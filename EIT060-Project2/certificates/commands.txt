@@ -1,0 +1,19 @@
+
+keytool -import -file certificate.cer -alias doctor00truststore -keystore doctor00truststore
+
+keytool -keystore doctor00keystore -genkey -alias doctor00keystore
+
+keystore keystore -certreq -alias doctor00keystore -keyalg rsa -file doctor00.csr
+
+openssl x509 -req -CA cacert.pem -CAkey C:\Users\Pontus\git\EIT060---Project2\EIT060-Project2\certificates\CA\private\cakey.pem -in doctor00.csr -out doctor00.cer -days 365 -CAcreateserial
+
+keytool -import -keystore doctor00keystore -file cacert.pem -alias cert
+
+keytool -import -keystore doctor00keystore -file doctor00.cer -alias doctor00keystore
+
+
+cd
+javac server.java client.java
+
+java server 9876
+java client localhost 9876

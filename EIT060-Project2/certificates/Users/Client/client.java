@@ -1,10 +1,20 @@
-package Client;
-import java.net.*;
-import java.io.*;
-import javax.net.ssl.*;
-import javax.security.cert.X509Certificate;
+package Users.Client;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.security.KeyStore;
-import java.security.cert.*;
+import java.util.Scanner;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
+import javax.security.cert.X509Certificate;
 
 /*
  * This example shows how to set up a key manager to perform client
@@ -33,19 +43,44 @@ public class client {
             System.out.println("USAGE: java client host port");
             System.exit(-1);
         }
+        
+        /******Tillagd kod för test*****/
+        
+        boolean login = false;
+        Scanner scan = new Scanner(System.in);
+        String userName = null;
+        String password = null;
+        FileInputStream file = null;
+        
+        while(login){
+        	try{
+        	userName = scan.nextLine();
+        	System.out.println("Username: ");
+        	password = scan.nextLine();
+        	System.out.println("Password: ");
+        	
+        	file = new FileInputStream("");
+        	
+        	}catch(FileNotFoundException e){
+        		e.printStackTrace();
+        		System.out.println("You entered the wrong username or password. Please try again.");
+        	}
+        }
+        
+        /******Tillagd kod slut*****/
 
         try { /* set up a key manager for client authentication */
             SSLSocketFactory factory = null;
             try {
-                char[] password = "password".toCharArray();
+                char[] pass = password.toCharArray();
                 KeyStore ks = KeyStore.getInstance("JKS");
                 KeyStore ts = KeyStore.getInstance("JKS");
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
                 SSLContext ctx = SSLContext.getInstance("TLS");
-                ks.load(new FileInputStream("clientkeystore"), password);  // keystore password (storepass)
-				ts.load(new FileInputStream("clienttruststore"), password); // truststore password (storepass);
-				kmf.init(ks, password); // user password (keypass)
+                ks.load(new FileInputStream("clientkeystore"), pass);  // keystore password (storepass)
+				ts.load(new FileInputStream("clienttruststore"), pass); // truststore password (storepass);
+				kmf.init(ks, pass); // user password (keypass)
 				tmf.init(ts); // keystore can be used as truststore here
 				ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
                 factory = ctx.getSocketFactory();
