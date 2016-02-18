@@ -44,7 +44,7 @@ public class client {
             System.exit(-1);
         }
         
-        /******Tillagd kod för test*****/
+        /******Tillagd kod fï¿½r test*****/
         
         boolean login = false;
         Scanner scan = new Scanner(System.in);
@@ -101,10 +101,12 @@ public class client {
             SSLSession session = socket.getSession();
             X509Certificate cert = (X509Certificate)session.getPeerCertificateChain()[0];
             String subject = cert.getSubjectDN().getName();
-String issuer = cert.getIssuerDN().getName();
-String serial = cert.getSerialNumber().toString();
+            
+            String issuer = cert.getIssuerDN().getName();
+            String serial = cert.getSerialNumber().toString();
+            
             System.out.println("certificate name (subject DN field) on certificate received from server:\n" + subject + "\n" + "issuer name (issuer DN field) on certificate received from server:\n" + issuer);
-System.out.println("Serial number: " + serial);
+            System.out.println("Serial number: " + serial);
             System.out.println("socket after handshake:\n" + socket + "\n");
             System.out.println("secure connection established\n\n");
 

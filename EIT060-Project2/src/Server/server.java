@@ -19,15 +19,19 @@ public class server implements Runnable {
         try {
             SSLSocket socket=(SSLSocket)serverSocket.accept();
             newListener();
-           SSLSession session = socket.getSession();
+            SSLSession session = socket.getSession();
             X509Certificate cert = (X509Certificate)session.getPeerCertificateChain()[0];
             String subject = cert.getSubjectDN().getName();
-String issuer = cert.getIssuerDN().getName();
-String serial = cert.getSerialNumber().toString();
+            
+            String issuer = cert.getIssuerDN().getName();
+            String serial = cert.getSerialNumber().toString();
+		
     	    numConnectedClients++;
             System.out.println("client connected");
             System.out.println("client name (cert subject DN field): " + subject + "\n" + "issuer name(cert issuer DN field): " + issuer);
-System.out.println("Serial number: " + serial);
+            	
+            System.out.println("Serial number: " + serial);
+            
             System.out.println(numConnectedClients + " concurrent connection(s)\n");
 
             PrintWriter out = null;
@@ -40,6 +44,20 @@ System.out.println("Serial number: " + serial);
 			    String rev = new StringBuilder(clientMsg).reverse().toString();
                 System.out.println("received '" + clientMsg + "' from client");
                 System.out.print("sending '" + rev + "' to client...");
+                
+                String response = "";
+                switch(clientMsg){
+                	case "-l":
+                		response = "Användarnamn: ";
+                		break;
+                	case "Hejdå":
+                		response = "Hejdå tillbaka";
+                		break;
+                }
+                
+                out.println("Respons: " + response);
+                
+                
 				out.println(rev);
 				out.flush();
                 System.out.println("done\n");
