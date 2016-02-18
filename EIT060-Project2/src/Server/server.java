@@ -9,6 +9,7 @@ import javax.security.cert.X509Certificate;
 public class server implements Runnable {
     private ServerSocket serverSocket = null;
     private static int numConnectedClients = 0;
+    private Database dataBase;
 
     public server(ServerSocket ss) throws IOException {
         serverSocket = ss;
