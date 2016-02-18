@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import Client.Doctor;
+import Client.Employee;
 import Client.Government;
 import Client.Nurse;
 import Client.User;
@@ -23,18 +24,10 @@ public class Database {
 		RecordEntry re = records.get(socialSecurityNumber);
 		if (user instanceof Government) {
 			return re.getRecord();
-		} else if (user instanceof Doctor) {
-			Doctor doctor = (Doctor) user;
-			if (doctor.getDivisionID() == re.getDivisionID()) {
+		} else if (user instanceof Employee) {
+			Employee employee = (Employee) user;
+			if (employee.getDivisionID() == re.getDivisionID()) {
 				return re.getRecord();
-			}
-		} else if (user instanceof Nurse) {
-			Nurse nurse = (Nurse) user;
-			int[] nurseIDs = re.getNurseID();
-			for (int nurseID : nurseIDs) {
-				if (nurseID == nurse.getID()) {
-					return re.getRecord();
-				}
 			}
 		} else {
 			this.user = (Patient) user;
@@ -68,13 +61,13 @@ public class Database {
 				} else {
 					System.out.println("Patienten tillhör ej din division");
 				}
-			}
-		} else if (user instanceof Nurse) {
-			int nurseID = ((Nurse) user).getID();
-			for (int nID : oldRecord.getNurseID()) {
-				if (nurseID == nID) {
-					records.remove(socialSecurityNumber);
-					records.put(socialSecurityNumber, record);
+			} else if (user instanceof Nurse) {
+				int nurseID = ((Nurse) user).getID();
+				for (int someNurseID : oldRecord.getNurseID()) {
+					if (nurseID == someNurseID) {
+						records.remove(socialSecurityNumber);
+						records.put(socialSecurityNumber, record);
+					}
 				}
 			}
 		}

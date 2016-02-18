@@ -1,9 +1,9 @@
 package Client;
 
-public class Doctor extends User{
+public class Doctor extends Employee{
 
-	public int getDivisionID(){
-		return 0;
+	public Doctor(int personalID, int division){
+		super(personalID, division);
 	}
-	
+
 }
