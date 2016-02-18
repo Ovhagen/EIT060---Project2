@@ -55,6 +55,7 @@ public class server implements Runnable {
                 		break;
                 }
                 
+                
                 out.println("Respons: " + response);
                 
                 
