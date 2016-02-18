@@ -2,18 +2,18 @@ package Server;
 
 public class Record {
 	
-	private int ID;
-	private String firstName, surName, comment;
+
+	private String ID, firstName, surName, comment;
 
 
-	public Record(int ID, String firstName, String surName, String comment){
+	public Record(String ID, String firstName, String surName, String comment){
 		this.ID = ID;
 		this.firstName = firstName;
 		this.surName = surName;
 		this.comment = comment;
 	}
 	
-	public int getID() {
+	public String getID() {
 		return ID;
 	}
 
@@ -27,6 +27,11 @@ public class Record {
 
 	public String getComment() {
 		return comment;
+	}
+	
+	
+	public String toString(){
+		return ("ID: " + ID + "\n Förnamn: " + firstName + "\n Efternamn: " + surName + "\n Comment: " + comment);
 	}
 	
 	

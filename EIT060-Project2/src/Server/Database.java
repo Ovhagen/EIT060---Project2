@@ -18,13 +18,14 @@ public class Database {
 
 	public final static int GOVERNMENT = 3, DOCTOR = 2, NURSE = 1, USER = 0;
 	private User user;
-	private HashMap<Integer, RecordEntry> records;
+	private HashMap<String, RecordEntry> records;
 	private File file;
 
 	public Database(File file) {
-		records = new HashMap<Integer, RecordEntry>();
+		records = new HashMap<String, RecordEntry>();
 		this.file = file;
-		//loadDataBase();
+		loadDataBase();
+		System.out.println(records.get("5301231531").getRecord().toString());
 	}
 	
 	/**-Users
@@ -34,7 +35,7 @@ public class Database {
 	 */
 
 	private void loadDataBase(){
-		HashMap<Integer, User> users = new HashMap<>();
+		HashMap<String, User> users = new HashMap<>();
 		Scanner scan = null;
 		try {
 			scan = new Scanner(file);
@@ -43,16 +44,15 @@ public class Database {
 			e.printStackTrace();
 		}
 		String line = scan.nextLine();
-		while(!line.equals("START")){
+		while(!line.equals("-Users")){
 			line = scan.nextLine();
 		}
-
+		line = scan.nextLine();
 		if(line != null){
-			while(line.equals("-Records")){
+			while(!line.equals("-Records")){
 				String[] infos = line.split(";");
 				String userType = infos[0];
-				int userID = new Integer(infos[1]);
-				Record record;
+				String userID = infos[1];
 				switch(userType){
 				case "G":
 					Government government = new Government(userID);
@@ -72,28 +72,31 @@ public class Database {
 				}
 				line = scan.nextLine();
 			}
+			line = scan.nextLine();
 			while(line != null){
 				String[] infos = line.split(";");
-				int userID = new Integer(infos[0]);
+				String socialSecurityNumber = infos[0];
 				int divisionID = new Integer(infos[1]);
-				Record record = new Record(userID, infos[1], infos[2], infos[3]);
-				int i = 4;
+				Record record = new Record(socialSecurityNumber, infos[2], infos[3], infos[4]);
+				int i = 5;
 				int doctorID = -1;
 				ArrayList<Integer> nurseIDs = new ArrayList<>();
-				int socialSecurityNumber = -1;
 				while(i < infos.length){
 					user = users.get(infos[i]);
 					if(user.getClass() == Doctor.class){
-						doctorID = user.getID();
+						doctorID = new Integer(user.getID());
 					} else if (user.getClass() == Nurse.class){
-						nurseIDs.add(user.getID());
-					} else if (user.getClass() == Patient.class){
-						socialSecurityNumber = user.getID();
+						nurseIDs.add(new Integer(user.getID()));
 					}
+					i++;
 				}
 				RecordEntry recordEntry = new RecordEntry(record,divisionID,doctorID,nurseIDs,socialSecurityNumber);
 				records.put(socialSecurityNumber, recordEntry);
-				line = scan.nextLine();
+				if(scan.hasNextLine()){
+					line = scan.nextLine();
+				} else {
+					line = null;
+				}
 			}
 		}
 		
@@ -122,7 +125,7 @@ public class Database {
 	}
 
 	public void putRecord(User user, Record record, int divisionID, int doctorID, ArrayList<Integer> nurseIDs,
-			int socialSecurityNumber) {
+			String socialSecurityNumber) {
 		RecordEntry recordEntry = new RecordEntry(record, divisionID, doctorID, nurseIDs, socialSecurityNumber);
 		if (user instanceof Government || user instanceof Doctor) {
 			records.put(socialSecurityNumber, recordEntry);
@@ -131,21 +134,21 @@ public class Database {
 		}
 	}
 
-	public void editRecord(User user, int socialSecurityNumber, RecordEntry record) {
+	public void editRecord(User user, String socialSecurityNumber, RecordEntry record) {
 		RecordEntry oldRecord = records.get(socialSecurityNumber);
 		if (oldRecord != null) {
 			if (user instanceof Government) {
 				records.remove(socialSecurityNumber);
 				records.put(socialSecurityNumber, record);
 			} else if (user instanceof Doctor) {
-				if (((Doctor) user).getID() == oldRecord.getDoctorID()) {
+				if (new Integer(user.getID()) == oldRecord.getDoctorID()) {
 					records.remove(socialSecurityNumber);
 					records.put(socialSecurityNumber, record);
 				} else {
 					System.out.println("Patienten tillhör ej din division");
 				}
 			} else if (user instanceof Nurse) {
-				int nurseID = ((Nurse) user).getID();
+				int nurseID = new Integer(user.getID());
 				for (int someNurseID : oldRecord.getNurseID()) {
 					if (nurseID == someNurseID) {
 						records.remove(socialSecurityNumber);
@@ -158,10 +161,11 @@ public class Database {
 
 	private class RecordEntry {
 		private Record record;
-		private int doctorID, socialSecurityNumber, divisionID;
+		private int doctorID, divisionID;
 		private ArrayList<Integer> nurseIDs;
+		private String socialSecurityNumber;
 
-		public RecordEntry(Record record, int divisionID, int doctorID, ArrayList<Integer> nurseIDs, int socialSecurityNumber) {
+		public RecordEntry(Record record, int divisionID, int doctorID, ArrayList<Integer> nurseIDs, String socialSecurityNumber) {
 			this.record = record;
 			this.doctorID = doctorID;
 			this.nurseIDs = nurseIDs;
@@ -177,7 +181,7 @@ public class Database {
 			return nurseIDs;
 		}
 
-		public int getSocialSecurityNumber() {
+		public String getSocialSecurityNumber() {
 			return socialSecurityNumber;
 		}
 
@@ -188,6 +192,7 @@ public class Database {
 		public int getDivisionID() {
 			return divisionID;
 		}
+
 
 	}
 

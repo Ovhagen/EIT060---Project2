@@ -2,7 +2,7 @@ package Client;
 
 public class Doctor extends Employee{
 
-	public Doctor(int personalID, int division){
+	public Doctor(String personalID, int division){
 		super(personalID, division);
 	}
 

@@ -1,15 +1,16 @@
 package Client;
 
 public abstract class User {
-	protected int personalID;
+	protected String personalID;
 	
-	public User(int personalID){
+	public User(String personalID){
 		this.personalID = personalID;
 	}
 
-	public int getID(){
+	public String getID(){
 		return personalID;
 	}
+	
 	
 	
 }
