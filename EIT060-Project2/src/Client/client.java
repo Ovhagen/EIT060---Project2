@@ -76,7 +76,7 @@ public class client {
             SSLSocketFactory factory = null;
             try {
                 //char[] pass = password.toCharArray();
-            	char[] pass = "password".toCharArray();
+            	char[] pass = "doctor00".toCharArray();
                 KeyStore ks = KeyStore.getInstance("JKS");
                 KeyStore ts = KeyStore.getInstance("JKS");
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
@@ -88,8 +88,8 @@ public class client {
                 String location = "" + tempLocation;
                 location = location.substring(5, location.length()-5);
               
-                ks.load(new FileInputStream(location + "/certificates/Client/clientkeystore"), pass);  // keystore password (storepass)
-				ts.load(new FileInputStream(location + "/certificates/Client/clienttruststore"), pass); // truststore password (storepass);
+                ks.load(new FileInputStream(location + "/certificates/Users/doctor00/doctor00keystore"), pass);  // keystore password (storepass)
+				ts.load(new FileInputStream(location + "/certificates/Users/doctor00/doctor00truststore"), pass); // truststore password (storepass);
 				kmf.init(ks, pass); // user password (keypass)
 				tmf.init(ts); // keystore can be used as truststore here
 				ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
