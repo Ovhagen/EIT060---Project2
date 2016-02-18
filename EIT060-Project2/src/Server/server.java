@@ -79,6 +79,7 @@ public class server implements Runnable {
     private void newListener() { (new Thread(this)).start(); } // calls run()
 
     public static void main(String args[]) {
+        
         System.out.println("\nServer Started\n");
         int port = -1;
         if (args.length >= 1) {
@@ -106,9 +107,14 @@ public class server implements Runnable {
                 KeyStore ks = KeyStore.getInstance("JKS");
 				KeyStore ts = KeyStore.getInstance("JKS");
                 char[] password = "password".toCharArray();
-
-                ks.load(new FileInputStream("serverkeystore"), password);  // keystore password (storepass)
-                ts.load(new FileInputStream("servertruststore"), password); // truststore password (storepass)
+                
+                /**Set and trim path to folders*/
+                URL tempLocation = server.class.getProtectionDomain().getCodeSource().getLocation();
+                String location = "" + tempLocation;
+                location = location.substring(5, location.length()-5);
+                
+                ks.load(new FileInputStream(location + "/certificates/Server/serverkeystore"), password);  // keystore password (storepass)
+                ts.load(new FileInputStream(location + "/certificates/Server/servertruststore"), password); // truststore password (storepass)
                 kmf.init(ks, password); // certificate password (keypass)
                 tmf.init(ts);  // possible to use keystore as truststore here
                 ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);

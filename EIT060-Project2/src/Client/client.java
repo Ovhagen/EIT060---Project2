@@ -1,10 +1,11 @@
-package Users.Client;
+package Client;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.security.KeyStore;
 import java.util.Scanner;
 
@@ -15,6 +16,8 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import javax.security.cert.X509Certificate;
+
+import Server.server;
 
 /*
  * This example shows how to set up a key manager to perform client
@@ -45,7 +48,7 @@ public class client {
         }
         
         /******Tillagd kod f�r test*****/
-        
+        /*
         boolean login = false;
         Scanner scan = new Scanner(System.in);
         String userName = null;
@@ -66,20 +69,27 @@ public class client {
         		System.out.println("You entered the wrong username or password. Please try again.");
         	}
         }
-        
+        */
         /******Tillagd kod slut*****/
 
         try { /* set up a key manager for client authentication */
             SSLSocketFactory factory = null;
             try {
-                char[] pass = password.toCharArray();
+                //char[] pass = password.toCharArray();
+            	char[] pass = "password".toCharArray();
                 KeyStore ks = KeyStore.getInstance("JKS");
                 KeyStore ts = KeyStore.getInstance("JKS");
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
                 SSLContext ctx = SSLContext.getInstance("TLS");
-                ks.load(new FileInputStream("clientkeystore"), pass);  // keystore password (storepass)
-				ts.load(new FileInputStream("clienttruststore"), pass); // truststore password (storepass);
+                
+                /**Set and trim path to folders*/
+                URL tempLocation = server.class.getProtectionDomain().getCodeSource().getLocation();
+                String location = "" + tempLocation;
+                location = location.substring(5, location.length()-5);
+              
+                ks.load(new FileInputStream(location + "/certificates/Client/clientkeystore"), pass);  // keystore password (storepass)
+				ts.load(new FileInputStream(location + "/certificates/Client/clienttruststore"), pass); // truststore password (storepass);
 				kmf.init(ks, pass); // user password (keypass)
 				tmf.init(ts); // keystore can be used as truststore here
 				ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
