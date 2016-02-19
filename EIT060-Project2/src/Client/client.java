@@ -47,15 +47,14 @@ public class client {
 			try {
 				System.out.println("Social security number: ");
 				userPath = scan.nextLine();
-				// while (userPath.length() != 10) {
-				// System.out.println("Personnummer: ");
-				// userPath = scan.nextLine();
-				// }
-				System.out.println("PassworD: ");
+	
+				/*Users keystore password is entered*/
+				System.out.println("Password: ");
 				passwd = scan.nextLine();
+				
 				keyfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "keystore");
-				trustfile = new FileInputStream(
-						loc + "/certificates/Users/" + userPath + "/" + userPath + "truststore");
+				trustfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "truststore");
+				
 				login = false;
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -67,10 +66,13 @@ public class client {
 			SSLSocketFactory factory = null;
 			try {
 				char[] pass = passwd.toCharArray();
+				
 				KeyStore ks = KeyStore.getInstance("JKS");
 				KeyStore ts = KeyStore.getInstance("JKS");
+				
 				KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
 				TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+				
 				SSLContext ctx = SSLContext.getInstance("TLS");
 
 				/** Set and trim path to folders */
