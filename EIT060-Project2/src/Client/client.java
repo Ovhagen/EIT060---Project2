@@ -1,4 +1,5 @@
 package Client;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,121 +30,127 @@ import Server.server;
  */
 public class client {
 
-    public static void main(String[] args) throws Exception {
-        String host = null;
-        int port = -1;
-        for (int i = 0; i < args.length; i++) {
-            System.out.println("args[" + i + "] = " + args[i]);
-        }
-        if (args.length < 2) {
-            System.out.println("USAGE: java client host port");
-            System.exit(-1);
-        }
-        try { /* get input parameters */
-            host = args[0];
-            port = Integer.parseInt(args[1]);
-        } catch (IllegalArgumentException e) {
-            System.out.println("USAGE: java client host port");
-            System.exit(-1);
-        }
-        
-        /******Tillagd kod f�r test*****/
-        /*
-        boolean login = false;
-        Scanner scan = new Scanner(System.in);
-        String userName = null;
-        String password = null;
-        FileInputStream file = null;
-        
-        while(login){
-        	try{
-        	userName = scan.nextLine();
-        	System.out.println("Username: ");
-        	password = scan.nextLine();
-        	System.out.println("Password: ");
-        	
-        	file = new FileInputStream("");
-        	
-        	}catch(FileNotFoundException e){
-        		e.printStackTrace();
-        		System.out.println("You entered the wrong username or password. Please try again.");
-        	}
-        }
-        */
-        /******Tillagd kod slut*****/
+	public static void main(String[] args) throws Exception {
+		String host = "localhost";
+		int port = 9876;
+		String passwd = "";
+		String userPath = "";
+		boolean login = true;
+		Scanner scan = new Scanner(System.in);
+		FileInputStream keyfile = null;
+		FileInputStream trustfile = null;
+		URL tempLoc = server.class.getProtectionDomain().getCodeSource()
+				.getLocation();
+		String loc = "" + tempLoc;
+		loc = loc.substring(5, loc.length() - 5);
+		
+		while (login) {
+			try {
+				System.out.println("Personnummer: ");
+				userPath = scan.nextLine();
+//				while (userPath.length() != 10) {
+//					System.out.println("Personnummer: ");
+//					userPath = scan.nextLine();
+//				}
+				System.out.println("Password: ");
+				passwd = scan.nextLine();
+				keyfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "keystore");
+				trustfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "truststore");
+				login = false;
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				System.out
+						.println("You entered the wrong username or password. Please try again.");
+			}
+		}
 
-        try { /* set up a key manager for client authentication */
-            SSLSocketFactory factory = null;
-            try {
-                //char[] pass = password.toCharArray();
-            	char[] pass = "doctor00".toCharArray();
-                KeyStore ks = KeyStore.getInstance("JKS");
-                KeyStore ts = KeyStore.getInstance("JKS");
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-                SSLContext ctx = SSLContext.getInstance("TLS");
-                
-                /**Set and trim path to folders*/
-                URL tempLocation = server.class.getProtectionDomain().getCodeSource().getLocation();
-                String location = "" + tempLocation;
-                location = location.substring(5, location.length()-5);
-              
-                ks.load(new FileInputStream(location + "/certificates/Users/doctor00/doctor00keystore"), pass);  // keystore password (storepass)
-				ts.load(new FileInputStream(location + "/certificates/Users/doctor00/doctor00truststore"), pass); // truststore password (storepass);
+		try { /* set up a key manager for client authentication */
+			SSLSocketFactory factory = null;
+			try {
+				char[] pass = passwd.toCharArray();
+				KeyStore ks = KeyStore.getInstance("JKS");
+				KeyStore ts = KeyStore.getInstance("JKS");
+				KeyManagerFactory kmf = KeyManagerFactory
+						.getInstance("SunX509");
+				TrustManagerFactory tmf = TrustManagerFactory
+						.getInstance("SunX509");
+				SSLContext ctx = SSLContext.getInstance("TLS");
+
+				/** Set and trim path to folders */
+				URL tempLocation = server.class.getProtectionDomain()
+						.getCodeSource().getLocation();
+				String location = "" + tempLocation;
+				location = location.substring(5, location.length() - 5);
+
+				ks.load(keyfile, pass); // keystore
+																			// password
+																			// (storepass)
+				ts.load(trustfile, pass); // truststore
+																			// password
+																			// (storepass);
 				kmf.init(ks, pass); // user password (keypass)
 				tmf.init(ts); // keystore can be used as truststore here
 				ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-                factory = ctx.getSocketFactory();
-            } catch (Exception e) {
-                throw new IOException(e.getMessage());
-            }
-            SSLSocket socket = (SSLSocket)factory.createSocket(host, port);
-            System.out.println("\nsocket before handshake:\n" + socket + "\n");
+				factory = ctx.getSocketFactory();
+			} catch (Exception e) {
+				throw new IOException(e.getMessage());
+			}
+			SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
+			System.out.println("\nsocket before handshake:\n" + socket + "\n");
 
-            /*
-             * send http request
-             *
-             * See SSLSocketClient.java for more information about why
-             * there is a forced handshake here when using PrintWriters.
-             */
-            socket.startHandshake();
+			/*
+			 * send http request
+			 * 
+			 * See SSLSocketClient.java for more information about why there is
+			 * a forced handshake here when using PrintWriters.
+			 */
+			socket.startHandshake();
 
-            SSLSession session = socket.getSession();
-            X509Certificate cert = (X509Certificate)session.getPeerCertificateChain()[0];
-            String subject = cert.getSubjectDN().getName();
-            
-            String issuer = cert.getIssuerDN().getName();
-            String serial = cert.getSerialNumber().toString();
-            
-            System.out.println("certificate name (subject DN field) on certificate received from server:\n" + subject + "\n" + "issuer name (issuer DN field) on certificate received from server:\n" + issuer);
-            System.out.println("Serial number: " + serial);
-            System.out.println("socket after handshake:\n" + socket + "\n");
-            System.out.println("secure connection established\n\n");
+			SSLSession session = socket.getSession();
+			X509Certificate cert = (X509Certificate) session
+					.getPeerCertificateChain()[0];
+			String subject = cert.getSubjectDN().getName();
 
-            BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String msg;
+			String issuer = cert.getIssuerDN().getName();
+			String serial = cert.getSerialNumber().toString();
+
+			System.out
+					.println("certificate name (subject DN field) on certificate received from server:\n"
+							+ subject
+							+ "\n"
+							+ "issuer name (issuer DN field) on certificate received from server:\n"
+							+ issuer);
+			System.out.println("Serial number: " + serial);
+			System.out.println("socket after handshake:\n" + socket + "\n");
+			System.out.println("secure connection established\n\n");
+
+			BufferedReader read = new BufferedReader(new InputStreamReader(
+					System.in));
+			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					socket.getInputStream()));
+			String msg;
 			for (;;) {
-                System.out.print(">");
-                msg = read.readLine();
-                if (msg.equalsIgnoreCase("quit")) {
-				    break;
+				System.out.print(">");
+				msg = read.readLine();
+				if (msg.equalsIgnoreCase("quit")) {
+					break;
 				}
-                System.out.print("sending '" + msg + "' to server...");
-                out.println(msg);
-                out.flush();
-                System.out.println("done");
+				System.out.print("sending '" + msg + "' to server...");
+				out.println(msg);
+				out.flush();
+				System.out.println("done");
 
-                System.out.println("received '" + in.readLine() + "' from server\n");
-            }
-            in.close();
+				System.out.println("received '" + in.readLine()
+						+ "' from server\n");
+			}
+			in.close();
 			out.close();
 			read.close();
-            socket.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+			socket.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }
