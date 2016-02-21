@@ -128,13 +128,34 @@ public class client {
 				if (msg.equalsIgnoreCase("quit")) {
 					break;
 				}
-				System.out.print("sending '" + msg + "' to server...");
+				//System.out.print("sending '" + msg + "' to server...");
 				out.println(msg);
 				out.flush();
-				System.out.println("done");
-
-				System.out.println("received '" + in.readLine() + "' from server\n");
+				//System.out.println("done");
+				
+				
+				//System.out.println("Recieved from server: ");
+				/*
+				String inLine = read.readLine();
+				System.out.println(inLine);
+				while(!inLine.equals("listen") && inLine !=null){
+						System.out.println(inLine);
+						inLine = read.readLine();
+				}
+				System.out.println("Nu börjar vi om");
+				*/
+				String fromServer;
+				while ((fromServer = in.readLine()) != null) {
+				    if (fromServer.equals("listen")){
+				        break;
+				    } else {
+					    System.out.println(fromServer);
+				    }
+				}
+				
+				
 			}
+			System.out.println("Avslutade");
 			in.close();
 			out.close();
 			read.close();

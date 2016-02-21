@@ -3,19 +3,30 @@ package Server;
 import java.io.*;
 import java.net.*;
 import java.security.KeyStore;
+import java.util.ArrayList;
+
 import javax.net.*;
 import javax.net.ssl.*;
 import javax.security.cert.X509Certificate;
 
+import Client.Doctor;
+import Client.User;
+
 public class server implements Runnable {
 	private ServerSocket serverSocket = null;
 	private static int numConnectedClients = 0;
-	private Database dataBase;
+	private Database db;
+	private User user;
+	private BufferedReader in;
+	PrintWriter out;
 
 	public server(ServerSocket ss) throws IOException {
 		serverSocket = ss;
 		newListener();
+		db = new Database();
+		user = new Doctor("1006", "Mantis Tobagan", 2);
 	}
+
 
 	public void run() {
 		try {
@@ -37,37 +48,26 @@ public class server implements Runnable {
 
 			System.out.println(numConnectedClients + " concurrent connection(s)\n");
 
-			PrintWriter out = null;
-			BufferedReader in = null;
+
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+
+			
 			String clientMsg = null;
 			while ((clientMsg = in.readLine()) != null) {
-				String rev = new StringBuilder(clientMsg).reverse().toString();
 				System.out.println("received '" + clientMsg + "' from client");
-				System.out.print("sending '" + rev + "' to client...");
+				
+				takeInput(clientMsg);
+				out.println("listen");
 
-				String response = "";
-				switch (clientMsg) {
-				case "-l":
-					response = "Anv√§ndarnamn: ";
-					break;
-				case "Hejd√•":
-					response = "Hejd√• tillbaka";
-					break;
-
-				default:
-					response = "Unknown command. Check your syntax and try again.";
-					break;
-				}
-
-				out.println("Respons: " + response);
-
-				out.println(rev);
 				out.flush();
 				System.out.println("done\n");
 			}
+			
+			
+			
+			
 			in.close();
 			out.close();
 			socket.close();
@@ -79,6 +79,121 @@ public class server implements Runnable {
 			e.printStackTrace();
 			return;
 		}
+	}
+	
+	private void takeInput(String clientMsg) throws IOException{
+		String command = clientMsg;
+		if(command.contains("-g")){
+			String[] infos = command.split(" ");
+			String socialSecurityNumber = infos[1];
+			if(socialSecurityNumber.length() == 10){
+				socialSecurityNumber = "19" + socialSecurityNumber;
+			}
+			if(socialSecurityNumber.length() == 12){
+				Record record = db.getRecord(socialSecurityNumber, user);
+				if(record != null){
+					out.println(record.toString());
+				} else {
+					out.println("No record for that social security number exists");
+				}
+			} else {
+				out.println("Wrong format. Try again");
+			}
+		} else if(command.contains("-h")){
+			System.out.println("Example: -g SocialSecurityNumber");
+			System.out.println("Example: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
+			System.out.println("Example: -e SocialSecurityNumber");
+		} else if(command.contains("-p")){
+			String[] infos = command.split(" ");
+			String firstName = infos[1];
+			String surName = infos[2];
+			int divisionID = new Integer(infos[3]);
+			String socialSecurityNumber = infos[infos.length-1];
+			ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
+			for(int i = 5; i < infos.length-1; i++){
+				nurseIDs.add(new Integer(infos[i]));
+			}
+			out.println("Add comment to record: ");
+			out.println("listen");
+			String comment = in.readLine();
+			System.out.println("Recieved " + comment + " from client");
+			out.flush();
+			System.out.println("done\n");
+			
+			
+			
+			Record record = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
+			int result = db.putRecord(user, record, divisionID, new Integer(user.getID()), nurseIDs, socialSecurityNumber);
+			if(result == 0){
+				out.println("Record added");
+			}
+		} else if(command.contains("-e")){
+			String[] infos = command.split(" ");
+			String socialSecurityNumber = infos[1];
+			if(socialSecurityNumber.length() == 10){
+				socialSecurityNumber = "19" + socialSecurityNumber;
+			}
+			if(socialSecurityNumber.length() == 12){
+				Record record = db.getRecord(socialSecurityNumber, user);
+				String firstName = record.getFirstName();
+				String surName = record.getSurName();
+				int divisionID = record.getDivisionID();
+				ArrayList<Integer> nurseIDs = db.getRecordEntry(socialSecurityNumber, user).getNurseIDs();
+				String comment = record.getComment();
+				out.println(record.toString());
+				out.println("What do you want to change? \n FirstName -fn \nSurname -sn \n Comment -co \n Divison -di \n SocialSecurityNumber -scc \n Quit -q");
+				String edit = in.readLine();
+				out.println("listen");
+				while(!edit.contains("q")){
+					String[] edits = edit.split(" ");
+					if(edits.length % 2 == 0){
+						for(int i = 0; i < edits.length; i+=2){
+							if(edits[i].contains("-co")){
+								int index = i+1;
+								comment = "";
+								while(index < edits.length && !edits[index].contains("-")){
+									comment += " " + edits[index];
+									index++;
+								}
+								i = index-2;
+							} else {
+							String choice = edits[i];
+							String change = edits[i+1];
+							if(choice.equals("-fn")){
+								firstName = change;
+							} else if(choice.equals("-sn")){
+								surName = change;
+							}else if(choice.equals("-di")){
+								divisionID = new Integer(change);
+							} else if(choice.equals("-scc")){
+								socialSecurityNumber = change;
+							} else {
+								out.println("Command " + choice + " not recognized");
+							}
+							}
+						}
+					} else {
+						out.println("Wrong format. Try again:");
+						out.println("listen");
+						edit = in.readLine();
+						
+					}
+					record = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
+					
+					int result = db.putRecord(user, record, divisionID, new Integer(user.getID()), nurseIDs, socialSecurityNumber);
+					if(result == 0){
+						out.println("Record added");
+					}
+					out.println(record.toString());
+					out.println("N‰sta ‰ndring: ");
+					out.println("listen");
+					edit = in.readLine();
+				}
+			}
+		} else {
+			out.println("Wrong format. Try again");
+		}
+	
 	}
 
 	private void newListener() {

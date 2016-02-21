@@ -36,7 +36,7 @@ public class Database {
 	private File file;
 	private String location;
 
-	public Database(String fileName) {
+	public Database() {
 		records = new HashMap<String, RecordEntry>();
 		users = new ArrayList<>();
 		
@@ -44,9 +44,15 @@ public class Database {
 		location = "" + tempLocation;
 		location = location.substring(5, location.length());		
 		
-		file = new File(location + "/Database/" + fileName);
-		loadDataBase();
+		file = getLatestDatabase();
+		if(file == null){
+			file = new File(location + "DataBase/DataBase-infoFile.txt");
+		} else {
+			System.out.println("Loading database " + file.getName());
+			loadDataBase();
+		}
 	}
+
 
 
 	private void loadDataBase() {
@@ -89,13 +95,17 @@ public class Database {
 				}
 				line = scan.nextLine();
 			}
-			line = scan.nextLine();
+			if(scan.hasNextLine()){
+				line = scan.nextLine();
+			} else {
+				line = null;
+			}
 			while (line != null) {
 				String[] infos = line.split(";");
 				String socialSecurityNumber = infos[0];
 				int divisionID = new Integer(infos[3]);
 				Record record = new Record(socialSecurityNumber, infos[1],
-						infos[2], infos[4]);
+						infos[2], divisionID, infos[4]);
 				int i = 5;
 				int doctorID = -1;
 				ArrayList<Integer> nurseIDs = new ArrayList<>();
@@ -145,13 +155,36 @@ public class Database {
 		
 	}
 	
+	private File getLatestDatabase(){
+		File folder = new File(location + "/Database");
+		File[] listOfFiles = folder.listFiles();
+		long newestFile = 0;
+		ArrayList<String[]> dates = new ArrayList<>();
+		for(File f : listOfFiles){
+			if(f.getName().length() == 22){
+				String d = f.getName().substring(8, f.getName().length());
+				long date  = Long.parseLong(d);
+				if(date > newestFile){
+					newestFile = date;
+				}
+			}
+		}
+		if(newestFile > 0){
+			return new File(location + "/Database/DataBase" + newestFile);
+		}else {
+			return null;
+		}
+		
+		
+	}
+	
 	public void saveDataBase() throws IOException {
 		File file = new File(location + "/Database/DataBase-infoFile.txt");
 		BufferedReader scan = null;
 		try {
 			scan = new BufferedReader(new InputStreamReader(
-					new FileInputStream(file), "UTF8"));
-		} catch (UnsupportedEncodingException | FileNotFoundException e) {
+					new FileInputStream(file)));
+		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -161,10 +194,10 @@ public class Database {
 		String todaysDate = sdf.format(cal.getTime());
 		PrintWriter writer = null;
 		try {
-			writer = new PrintWriter(new File(location + "/Database/DataBase" + todaysDate), "UTF8");
-		} catch (FileNotFoundException | UnsupportedEncodingException e1) {
+			writer = new PrintWriter(new File(location + "/Database/DataBase" + todaysDate));
+		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
 		String line = scan.readLine();
 		while (line != null) {
@@ -203,43 +236,87 @@ public class Database {
 			RecordEntry re = records.get(ssn);
 			if(re != null){
 				Record record = re.getRecord();
-				writer.println(ssn + ";" + record.getFirstName() + ";" + record.getSurName() + ";" + 
+				writer.print(ssn + ";" + record.getFirstName() + ";" + record.getSurName() + ";" + 
 								re.getDivisionID() + ";" + record.getComment() + ";" + re.getDoctorID());
 				ArrayList<Integer> nurseIDs = re.getNurseIDs();
 				for(int id : nurseIDs){
 					writer.print(";" + id);
 				}
+				writer.println();
 			}
 		}
 		writer.close();
 		removeOldestFile();
 	}
 
-	public Record getRecord(int socialSecurityNumber, User user) {
-		RecordEntry re = records.get(socialSecurityNumber);
-		if (user instanceof Government) {
-			return re.getRecord();
-		} else if (user instanceof Employee) {
-			Employee employee = (Employee) user;
-			if (employee.getDivisionID() == re.getDivisionID()) {
-				return re.getRecord();
-			}
-		} else if (re.getSocialSecurityNumber() == user.getID()) {
+	public Record getRecord(String socialSecurityNumber, User user) {
+		RecordEntry re = getRecordEntry(socialSecurityNumber, user);
+		if(re != null){
 			return re.getRecord();
 		}
 		return null;
 	}
+	
+	public RecordEntry getRecordEntry(String socialSecurityNumber, User user){
+		RecordEntry re = records.get(socialSecurityNumber);
+		if(re == null){
+			System.out.println("Finns ingen journal med det personnumret");
+			return null;
+		}
+		if (user instanceof Government) {
+			return re;
+		} else if (user instanceof Employee) {
+			Employee employee = (Employee) user;
+			if (employee.getDivisionID() == re.getDivisionID()) {
+				return re;
+			}
+		} else if (re.getSocialSecurityNumber() == user.getID()) {
+			return re;
+		}
+		System.out.println("Du får ej hämta ut den journalen");
+		return null;
+	}
 
-	public void putRecord(User user, Record record, int divisionID,
+	public void addUser(User user){
+		users.add(user);
+		try {
+			saveDataBase();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public int putRecord(User user, Record record, int divisionID,
 			int doctorID, ArrayList<Integer> nurseIDs,
 			String socialSecurityNumber) {
+		
+		System.out.println(user.getID());
+		
+
+		if(!users.contains(user)){
+			addUser(user);
+		}  
+		Patient patient = new Patient(socialSecurityNumber, record.getFirstName() + " " + record.getSurName());
+		if(!users.contains(patient)){
+			addUser(patient);
+		}
+		
 		RecordEntry recordEntry = new RecordEntry(record, divisionID, doctorID,
 				nurseIDs, socialSecurityNumber);
 		if (user instanceof Government || user instanceof Doctor) {
 			records.put(socialSecurityNumber, recordEntry);
 		} else {
 			System.out.println("Du har ej tillÃ¥telse att skapa en ny journal");
+			return -1;
 		}
+		try {
+			saveDataBase();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
 	public void editRecord(User user, String socialSecurityNumber,
@@ -266,15 +343,21 @@ public class Database {
 				}
 			}
 		}
+		try {
+			saveDataBase();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	private class RecordEntry {
+	public class RecordEntry {
 		private Record record;
 		private int doctorID, divisionID;
 		private ArrayList<Integer> nurseIDs;
 		private String socialSecurityNumber;
 
-		public RecordEntry(Record record, int divisionID, int doctorID,
+		private RecordEntry(Record record, int divisionID, int doctorID,
 				ArrayList<Integer> nurseIDs, String socialSecurityNumber) {
 			this.record = record;
 			this.doctorID = doctorID;
@@ -283,23 +366,23 @@ public class Database {
 			this.divisionID = divisionID;
 		}
 
-		public int getDoctorID() {
+		protected int getDoctorID() {
 			return doctorID;
 		}
 
-		public ArrayList<Integer> getNurseIDs() {
+		protected ArrayList<Integer> getNurseIDs() {
 			return nurseIDs;
 		}
 
-		public String getSocialSecurityNumber() {
+		protected String getSocialSecurityNumber() {
 			return socialSecurityNumber;
 		}
 
-		public Record getRecord() {
+		protected Record getRecord() {
 			return record;
 		}
 
-		public int getDivisionID() {
+		protected int getDivisionID() {
 			return divisionID;
 		}
 

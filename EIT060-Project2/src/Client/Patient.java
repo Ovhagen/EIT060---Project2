@@ -7,4 +7,5 @@ public class Patient extends User{
 		super(personalID, name);
 	}
 
+
 }

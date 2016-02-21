@@ -4,13 +4,15 @@ public class Record {
 	
 
 	private String ID, firstName, surName, comment;
+	private int divisionID;
 
 
-	public Record(String ID, String firstName, String surName, String comment){
+	public Record(String ID, String firstName, String surName, int divisionID, String comment){
 		this.ID = ID;
 		this.firstName = firstName;
 		this.surName = surName;
 		this.comment = comment;
+		this.divisionID = divisionID;
 	}
 	
 	public String getID() {
@@ -29,9 +31,13 @@ public class Record {
 		return comment;
 	}
 	
+	public int getDivisionID(){
+		return divisionID;
+	}
+	
 	
 	public String toString(){
-		return ("ID: " + ID + "\n FÃ¶rnamn: " + firstName + "\n Efternamn: " + surName + "\n Comment: " + comment);
+		return ("ID: " + ID + "\n Förnamn: " + firstName + "\n Efternamn: " + surName + "\nDivision: " + divisionID +  "\n Comment: " + comment);
 	}
 	
 	
