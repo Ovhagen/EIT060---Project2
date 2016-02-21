@@ -2,8 +2,8 @@ package Client;
 
 public class Nurse extends Employee{
 	
-	public Nurse(String personalID, int division){
-		super(personalID, division);
+	public Nurse(String personalID, String name, int division){
+		super(personalID, name, division);
 	}
 
 }

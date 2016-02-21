@@ -3,8 +3,8 @@ package Client;
 public abstract class Employee extends User{
 	protected int division;
 	
-	public Employee(String personalID, int division){
-		super(personalID);
+	public Employee(String personalID, String name, int division){
+		super(personalID, name);
 		this.division = division;
 	}
 

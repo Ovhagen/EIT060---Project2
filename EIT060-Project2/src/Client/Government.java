@@ -2,8 +2,8 @@ package Client;
 
 public class Government extends User {
 	
-	public Government(String personalID){
-		super(personalID);
+	public Government(String personalID, String name){
+		super(personalID, name);
 	}
 
 }
