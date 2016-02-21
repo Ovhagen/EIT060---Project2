@@ -1,15 +1,15 @@
 
-keytool -import -file certificate.cer -alias doctor00truststore -keystore doctor00truststore
+keytool -import -file certificate.cer -alias 9302281429_truststore -keystore 9302281429_truststore
 
-keytool -keystore doctor00keystore -genkey -alias doctor00keystore
+keytool -keystore 9302281429_keystore -genkey -alias 9302281429_keystore
 
-keystore keystore -certreq -alias doctor00keystore -keyalg rsa -file doctor00.csr
+keytool -keystore 9302281429_keystore -certreq -alias 9302281429_keystore -keyalg rsa -file 9302281429.csr
 
-openssl x509 -req -CA cacert.pem -CAkey C:\Users\Pontus\git\EIT060---Project2\EIT060-Project2\certificates\CA\private\cakey.pem -in doctor00.csr -out doctor00.cer -days 365 -CAcreateserial
+openssl x509 -req -CA cacert.pem -CAkey C:\Users\Pontus\git\EIT060---Project2\EIT060-Project2\certificates\CA\private\cakey.pem -in 9302281429.csr -out 9302281429.cer -days 365 -CAcreateserial
 
-keytool -import -keystore doctor00keystore -file cacert.pem -alias cert
+keytool -import -keystore 9302281429_keystore -file cacert.pem -alias cert
 
-keytool -import -keystore doctor00keystore -file doctor00.cer -alias doctor00keystore
+keytool -import -keystore 9302281429_keystore -file 9302281429.cer -alias 9302281429_keystore
 
 
 cd
