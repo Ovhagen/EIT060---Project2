@@ -1,19 +1,19 @@
 
-keytool -import -file certificate.cer -alias 9302281429_truststore -keystore 9302281429_truststore
+keytool -import -file certificate.cer -alias 7010103012_truststore -keystore 7010103012_truststore
 
-keytool -keystore 9302281429_keystore -genkey -alias 9302281429_keystore
+keytool -keystore 7010103012_keystore -genkey -alias 7010103012_keystore
 
-keytool -keystore 9302281429_keystore -certreq -alias 9302281429_keystore -keyalg rsa -file 9302281429.csr
+keytool -keystore 7010103012_keystore -certreq -alias 7010103012_keystore -keyalg rsa -file 7010103012.csr
 
-openssl x509 -req -CA cacert.pem -CAkey C:\Users\Pontus\git\EIT060---Project2\EIT060-Project2\certificates\CA\private\cakey.pem -in 9302281429.csr -out 9302281429.cer -days 365 -CAcreateserial
+openssl x509 -req -CA cacert.pem -CAkey /h/d5/g/dic14pov/git/EIT060---Project2/EIT060-Project2/certificates/CA/private/cakey.pem -in 7010103012.csr -out 7010103012.cer -days 365 -CAcreateserial
 
-keytool -import -keystore 9302281429_keystore -file cacert.pem -alias cert
+keytool -import -keystore 7010103012_keystore -file cacert.pem -alias cert
 
-keytool -import -keystore 9302281429_keystore -file 9302281429.cer -alias 9302281429_keystore
+keytool -import -keystore 7010103012_keystore -file 7010103012.cer -alias 7010103012_keystore
 
 
 cd
-javac server.java client.java
+javac Server/server.java Client/client.java
 
-java server 9876
-java client localhost 9876
+java Server.server 9876
+java Client.client 
