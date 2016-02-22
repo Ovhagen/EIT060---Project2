@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
@@ -16,6 +17,10 @@ import java.net.URL;
 
 
 //import com.sun.corba.se.impl.legacy.connection.SocketFactoryAcceptorImpl;
+
+
+
+
 
 import Client.Doctor;
 import Client.Employee;
@@ -107,9 +112,9 @@ public class Database {
 				ArrayList<Integer> nurseIDs = new ArrayList<>();
 				while (i < infos.length) {
 					int employeeNumber = new Integer(infos[i]);
-					if (employeeNumber >= 1000) {
+					if (employeeNumber >= 1000 && employeeNumber < 2000) {
 						doctorID = employeeNumber;
-					} else if (employeeNumber >= 2000) {
+					} else {
 						nurseIDs.add(employeeNumber);
 					}
 					i++;
@@ -245,20 +250,27 @@ public class Database {
 		removeOldestFile();
 	}
 
-	public Record getRecord(String socialSecurityNumber, User user) {
-		RecordEntry re = getRecordEntry(socialSecurityNumber, user);
-		if(re != null){
-			return re.getRecord();
+	public Record getRecord(String socialSecurityNumber, User user) throws NullPointerException, AuthorizationException {
+		RecordEntry re = null;
+		try {
+			re = getRecordEntry(socialSecurityNumber, user);
+		} catch (NullPointerException | AuthorizationException e) {
+			if(e instanceof AuthorizationException){
+				throw (AuthorizationException) e;
+			} else if(e instanceof NullPointerException){
+				throw new NullPointerException("These is no record for social security number " + socialSecurityNumber);
+			} else {
+				e.printStackTrace();
+			}
+			
 		}
-		return null;
+		return re.getRecord();
+		
+		
 	}
 	
-	public RecordEntry getRecordEntry(String socialSecurityNumber, User user){
+	public RecordEntry getRecordEntry(String socialSecurityNumber, User user) throws NullPointerException, AuthorizationException {
 		RecordEntry re = records.get(socialSecurityNumber);
-		if(re == null){
-			System.out.println("Finns ingen journal med det personnumret");
-			return null;
-		}
 		if (user instanceof Government) {
 			return re;
 		} else if (user instanceof Employee) {
@@ -266,10 +278,11 @@ public class Database {
 			if (employee.getDivisionID() == re.getDivisionID()) {
 				return re;
 			}
-		} else if (re.getSocialSecurityNumber() == user.getID()) {
+		} else if (re.getSocialSecurityNumber().equals(user.getID())) {
 			return re;
+		} else {
+			throw new AuthorizationException("You do not have permission to see that record");
 		}
-		System.out.println("Du fÂr ej h‰mta ut den journalen");
 		return null;
 	}
 
@@ -283,13 +296,9 @@ public class Database {
 		}
 	}
 	
-	public int putRecord(User user, Record record, int divisionID,
+	public void putRecord(User user, Record record, int divisionID,
 			int doctorID, ArrayList<Integer> nurseIDs,
-			String socialSecurityNumber) {
-		
-
-		
-
+			String socialSecurityNumber) throws NullPointerException, AuthorizationException{
 		if(!users.contains(user)){
 			addUser(user);
 		}  
@@ -303,8 +312,7 @@ public class Database {
 		if (user instanceof Government || user instanceof Doctor) {
 			records.put(socialSecurityNumber, recordEntry);
 		} else {
-			System.out.println("Du har ej till√•telse att skapa en ny journal");
-			return -1;
+			throw new AuthorizationException("You do not have the athority to create a record");
 		}
 		try {
 			saveDataBase();
@@ -312,38 +320,71 @@ public class Database {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return 0;
 	}
 
-	public void editRecord(User user, String socialSecurityNumber,
-			RecordEntry record) {
-		RecordEntry oldRecord = records.get(socialSecurityNumber);
-		if (oldRecord != null) {
-			if (user instanceof Government) {
-				records.remove(socialSecurityNumber);
-				records.put(socialSecurityNumber, record);
-			} else if (user instanceof Doctor) {
-				if (new Integer(user.getID()) == oldRecord.getDoctorID()) {
+	public void editRecord(User user, Record newRecord, String socialSecurityNumber) throws AuthorizationException, NullPointerException  {
+		try {
+			RecordEntry oldRecordEntry = getRecordEntry(socialSecurityNumber, user);
+			Record oldRecord = oldRecordEntry.getRecord();
+			
+			String comment = oldRecord.getComment();
+			int divisionID = oldRecord.getDivisionID();
+			
+			ArrayList<Integer> nurseIDs = oldRecordEntry.getNurseIDs();
+			int doctorID = oldRecordEntry.getDoctorID();
+			String firstName = oldRecord.getFirstName();
+			String surName = oldRecord.getSurName();
+			
+			if(newRecord.getComment() != null){
+				comment = newRecord.getComment();
+			}
+			if(newRecord.getDivisionID() > 0){
+				divisionID = newRecord.getDivisionID();
+			}
+			if(newRecord.getFirstName() != null){
+				firstName = newRecord.getFirstName();
+			}
+			if(newRecord.getSurName() != null){
+				surName = newRecord.getSurName();
+			}
+			Record editedRecord = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
+			RecordEntry editedRecordEntry = new RecordEntry(editedRecord, divisionID, doctorID, nurseIDs, socialSecurityNumber);
+			
+			if(user instanceof Patient){
+				throw new AuthorizationException("Patients are not allowed to edit records");
+			} else {
+				if (user instanceof Government) {
 					records.remove(socialSecurityNumber);
-					records.put(socialSecurityNumber, record);
-				} else {
-					System.out.println("Patienten tillh√∂r ej din division");
-				}
-			} else if (user instanceof Nurse) {
-				int nurseID = new Integer(user.getID());
-				for (int someNurseID : oldRecord.getNurseIDs()) {
-					if (nurseID == someNurseID) {
+					records.put(socialSecurityNumber, editedRecordEntry);
+				} else if (user instanceof Doctor) {
+					if (new Integer(user.getID()) == oldRecordEntry.getDoctorID()) {
 						records.remove(socialSecurityNumber);
-						records.put(socialSecurityNumber, record);
+						records.put(socialSecurityNumber, editedRecordEntry);
+					} else {
+						throw new AuthorizationException("The patient does not belong to your division, Dr " + user.getName());
+					}
+				} else if (user instanceof Nurse) {
+					int nurseID = new Integer(user.getID());
+					for (int someNurseID : oldRecordEntry.getNurseIDs()) {
+						if (nurseID == someNurseID) {
+							records.remove(socialSecurityNumber);
+							records.put(socialSecurityNumber, editedRecordEntry);
+						} else {
+							throw new AuthorizationException("This is not your patient, Nurse " + user.getName());
+						}
 					}
 				}
+				try {
+					saveDataBase();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		}
-		try {
-			saveDataBase();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (NullPointerException e){
+			throw (NullPointerException) e;
+		} catch (AuthorizationException e){
+			throw (AuthorizationException) e;
 		}
 	}
 
@@ -362,26 +403,33 @@ public class Database {
 			this.divisionID = divisionID;
 		}
 
-		protected int getDoctorID() {
+		private int getDoctorID() {
 			return doctorID;
 		}
 
-		protected ArrayList<Integer> getNurseIDs() {
+		private ArrayList<Integer> getNurseIDs() {
 			return nurseIDs;
 		}
 
-		protected String getSocialSecurityNumber() {
+		private String getSocialSecurityNumber() {
 			return socialSecurityNumber;
 		}
 
-		protected Record getRecord() {
+		private Record getRecord() {
 			return record;
 		}
 
-		protected int getDivisionID() {
+		private int getDivisionID() {
 			return divisionID;
 		}
 
 	}
+	
+	public class AuthorizationException extends Exception {
+		  public AuthorizationException() { super(); }
+		  public AuthorizationException(String message) { super(message); }
+		  public AuthorizationException(String message, Throwable cause) { super(message, cause); }
+		  public AuthorizationException(Throwable cause) { super(cause); }
+		}
 
 }
