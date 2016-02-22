@@ -5,19 +5,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Scanner;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.net.URL;
-import java.nio.file.Files;
 
-import javafx.scene.shape.Path;
 
 //import com.sun.corba.se.impl.legacy.connection.SocketFactoryAcceptorImpl;
 
@@ -159,7 +155,6 @@ public class Database {
 		File folder = new File(location + "/Database");
 		File[] listOfFiles = folder.listFiles();
 		long newestFile = 0;
-		ArrayList<String[]> dates = new ArrayList<>();
 		for(File f : listOfFiles){
 			if(f.getName().length() == 22){
 				String d = f.getName().substring(8, f.getName().length());
