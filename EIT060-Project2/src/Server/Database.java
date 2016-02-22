@@ -19,7 +19,7 @@ import java.nio.file.Files;
 
 import javafx.scene.shape.Path;
 
-import com.sun.corba.se.impl.legacy.connection.SocketFactoryAcceptorImpl;
+//import com.sun.corba.se.impl.legacy.connection.SocketFactoryAcceptorImpl;
 
 import Client.Doctor;
 import Client.Employee;
@@ -246,6 +246,7 @@ public class Database {
 			}
 		}
 		writer.close();
+		System.out.println("Database" + todaysDate + " was created.");
 		removeOldestFile();
 	}
 
@@ -291,7 +292,7 @@ public class Database {
 			int doctorID, ArrayList<Integer> nurseIDs,
 			String socialSecurityNumber) {
 		
-		System.out.println(user.getID());
+
 		
 
 		if(!users.contains(user)){

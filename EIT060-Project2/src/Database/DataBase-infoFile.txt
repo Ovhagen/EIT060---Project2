@@ -1,0 +1,7 @@
+/** Users */
+/** G = Government, D = Doctor, N = Nurse, P = Patient */
+/** Government IDs begin with 0---; Doctor IDs begin with 1---, Nurse IDs begin with 2--- */
+/** UserType;UserID;Full Name;Division
+
+/** Database */
+/** PersonalSeuciriyNumber;First Name; Surname; Division;Comment;DoctorID...;NurseID...

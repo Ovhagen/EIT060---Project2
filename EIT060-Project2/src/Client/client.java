@@ -52,8 +52,8 @@ public class client {
 				System.out.println("Password: ");
 				passwd = scan.nextLine();
 				
-				keyfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "keystore");
-				trustfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "truststore");
+				keyfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "_keystore");
+				trustfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "_truststore");
 				
 				login = false;
 			} catch (FileNotFoundException e) {
@@ -122,6 +122,7 @@ public class client {
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			String msg;
 			System.out.println("Succesful login! Type a command in the prompt and press enter.");
+			System.out.println("Get -g, Put -p, Edit -e, Help -h");
 			for (;;) {
 				System.out.print(">");
 				msg = read.readLine();

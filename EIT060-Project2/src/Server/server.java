@@ -53,11 +53,11 @@ public class server implements Runnable {
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(
 					socket.getInputStream()));
-
+			
 			String clientMsg = null;
 			while ((clientMsg = in.readLine()) != null) {
 				System.out.println("received '" + clientMsg + "' from client");
-
+				
 				takeInput(clientMsg);
 				out.println("listen");
 
@@ -98,10 +98,9 @@ public class server implements Runnable {
 				out.println("Wrong format. Try again");
 			}
 		} else if (command.contains("-h")) {
-			System.out.println("Example: -g SocialSecurityNumber");
-			System.out
-					.println("Example: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
-			System.out.println("Example: -e SocialSecurityNumber");
+			out.println("Example Get: -g SocialSecurityNumber");
+			out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
+			out.println("Example Edit: -e SocialSecurityNumber");
 		} else if (command.contains("-p")) {
 			String[] infos = command.split(" ");
 			String firstName = infos[1];
@@ -115,6 +114,7 @@ public class server implements Runnable {
 			out.println("Add comment to record: ");
 			out.println("listen");
 			String comment = in.readLine();
+			System.out.println("Recieved " + comment + " from client");
 			//System.out.println("Recieved " + comment + " from client");
 			out.flush();
 			//System.out.println("done\n");
@@ -141,10 +141,11 @@ public class server implements Runnable {
 						socialSecurityNumber, user).getNurseIDs();
 				String comment = record.getComment();
 				out.println(record.toString());
-				out.println("What do you want to change? \n FirstName -fn \nSurname -sn \n Comment -co \n Divison -di \n SocialSecurityNumber -scc \n Quit -q");
+				out.println("What do you want to change? \n FirstName -fn, Surname -sn, Comment -co, Divison -di \nSocialSecurityNumber -scc, Quit -q");
 				out.println("listen");
 				String edit = in.readLine();
 				out.flush();
+				System.out.println("Recieved " + edit + " from client");
 				while (!edit.contains("-q")) {
 					String[] edits = edit.split(" ");
 					for (int i = 0; i < edits.length; i += 2) {
@@ -189,6 +190,7 @@ public class server implements Runnable {
 					out.println("Nästa ändring: ");
 					out.println("listen");
 					edit = in.readLine();
+					System.out.println("Recieved " + edit + " from client");
 				}
 			}
 		} else {
