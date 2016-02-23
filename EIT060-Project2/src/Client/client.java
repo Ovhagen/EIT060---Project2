@@ -57,7 +57,6 @@ public class client {
 				
 				login = false;
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
 				System.out.println("You entered the wrong social security number or password. Please try again.");
 			}
 		}

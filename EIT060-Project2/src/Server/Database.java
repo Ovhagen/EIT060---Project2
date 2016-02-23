@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.io.InputStreamReader;
@@ -17,6 +19,8 @@ import java.net.URL;
 
 
 //import com.sun.corba.se.impl.legacy.connection.SocketFactoryAcceptorImpl;
+
+
 
 
 
@@ -55,7 +59,6 @@ public class Database {
 			loadDataBase();
 		}
 	}
-
 
 
 	synchronized private void loadDataBase() {
@@ -116,7 +119,7 @@ public class Database {
 					int employeeNumber = new Integer(infos[i]);
 					if (employeeNumber >= 1000 && employeeNumber < 2000) {
 						doctorID = employeeNumber;
-					} else {
+					} else if (employeeNumber >= 2000){
 						nurseIDs.add(employeeNumber);
 					}
 					i++;
@@ -266,8 +269,6 @@ public class Database {
 			
 		}
 		return re.getRecord();
-		
-		
 	}
 	
 	public RecordEntry getRecordEntry(String socialSecurityNumber, User user) throws NullPointerException, AuthorizationException {
@@ -316,16 +317,86 @@ public class Database {
 		
 		RecordEntry recordEntry = new RecordEntry(record, divisionID, doctorID,
 				nurseIDs, socialSecurityNumber);
-		if (user instanceof Government || user instanceof Doctor) {
+		if(user instanceof Doctor || user instanceof Government){
 			records.put(socialSecurityNumber, recordEntry);
+			try {
+				saveDataBase();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else {
 			throw new AuthorizationException("You do not have the athority to create a record");
 		}
+		
+	}
+	
+	public void printAllAvailabe(User user, int divisionID) throws AuthorizationException{
+		ArrayList<Record> records = null;
+		try{
+			records = getAllAvailabe(user, divisionID);
+			
+		} catch (AuthorizationException e){
+			throw e;
+		}
+	}
+	
+	private ArrayList<Record> getAllAvailabe(User user, int divisionID) throws AuthorizationException{
+		ArrayList<Record> tempRecords = new ArrayList<>();
+		Iterator it = records.entrySet().iterator();
+
+        Map.Entry pair = (Map.Entry)it.next();
+		if(user instanceof Government){
+			while (it.hasNext()) {
+		        tempRecords.add(((RecordEntry)pair.getValue()).getRecord());
+		        it.remove(); // avoids a ConcurrentModificationException
+		    }
+		} else if (user instanceof Doctor){
+			while (it.hasNext()) {
+		        RecordEntry re = (RecordEntry)pair.getValue();
+		        if(re.getDivisionID() == ((Doctor)user).getDivisionID()){
+		        	tempRecords.add(re.getRecord());
+		        }
+		        it.remove(); // avoids a ConcurrentModificationException
+		    }
+		} else if(user instanceof Nurse){
+			while (it.hasNext()) {
+		        RecordEntry re = (RecordEntry)pair.getValue();
+		        ArrayList<Integer> nurseIDs = re.getNurseIDs();
+		        for(int nurseID : nurseIDs){
+			        if(nurseID == new Integer(((Nurse)user).getID())){
+			        	tempRecords.add(re.getRecord());
+			        	break;
+			        }
+		        }
+		        it.remove(); // avoids a ConcurrentModificationException
+		    }
+		} else {
+			throw new AuthorizationException("You are not allowed to do that");
+		}
+		return tempRecords;
+	}
+	
+	public void removeRecord(User user, String socialSecurityNumber) throws AuthorizationException, NullPointerException{
+		RecordEntry re = null;
 		try {
-			saveDataBase();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			re = records.get(socialSecurityNumber);
+			if(re == null){
+				throw new NullPointerException();
+			} else if(user instanceof Government || user instanceof Doctor){
+				records.remove(socialSecurityNumber);
+				au.println("Removed record " + socialSecurityNumber);
+				try {
+					saveDataBase();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				throw new AuthorizationException("You are not allowed to delete records");
+			}
+		} catch(AuthorizationException | NullPointerException e){
+			throw e;
 		}
 	}
 
@@ -357,6 +428,7 @@ public class Database {
 			Record editedRecord = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
 			RecordEntry editedRecordEntry = new RecordEntry(editedRecord, divisionID, doctorID, nurseIDs, socialSecurityNumber);
 			
+			boolean success = false;
 			if(user instanceof Patient){
 				throw new AuthorizationException("Patients are not allowed to edit records");
 			} else {
@@ -365,6 +437,7 @@ public class Database {
 					records.put(socialSecurityNumber, editedRecordEntry);
 				} else if (user instanceof Doctor) {
 					if (new Integer(((Doctor) user).getDivisionID()) == oldRecordEntry.getDivisionID()) {
+						success = true;
 						records.remove(socialSecurityNumber);
 						records.put(socialSecurityNumber, editedRecordEntry);
 					} else {
@@ -374,11 +447,20 @@ public class Database {
 					int nurseID = new Integer(user.getID());
 					for (int someNurseID : oldRecordEntry.getNurseIDs()) {
 						if (nurseID == someNurseID) {
+							success = true;
 							records.remove(socialSecurityNumber);
 							records.put(socialSecurityNumber, editedRecordEntry);
 						} else {
 							throw new AuthorizationException("This is not your patient, Nurse " + user.getName());
 						}
+					}
+				}
+				if(success){
+					try {
+						saveDataBase();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}

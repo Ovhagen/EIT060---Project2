@@ -117,112 +117,131 @@ public class server implements Runnable {
 		String command = clientMsg;
 		User user = clients.get(clientID);
 		au.println(user, clientMsg);
-		if (command.contains("-h")) {
-			out.println("Example Get: -g SocialSecurityNumber");
-			out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
-			out.println("Example Edit: -e SocialSecurityNumber");
-		} 
-		if (command.contains("-p")) {
-			String[] infos = command.split(" ");
-			String firstName = infos[1];
-			String surName = infos[2];
-			int divisionID = new Integer(infos[3]);
-			String socialSecurityNumber = infos[infos.length - 1];
-			ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
-			for (int i = 5; i < infos.length - 1; i++) {
-				nurseIDs.add(new Integer(infos[i]));
-			}
-			out.println("Add comment to record: ");
-			out.println("listen");
-			String comment = in.readLine();
-			au.println(user,comment);
-			out.flush();
-
-			Record record = new Record(socialSecurityNumber, firstName,
-					surName, divisionID, comment);
-			try {
-				db.putRecord(user, record, divisionID, new Integer(
-						user.getID()), nurseIDs, socialSecurityNumber);
-				out.println("Record for " + socialSecurityNumber + " added");
-				au.println("Record for " + socialSecurityNumber + " added");
-			} catch (NumberFormatException | NullPointerException
-					| AuthorizationException e) {
-				out.println(e.getMessage());
-				au.errorprintln(user, e.getMessage());
-			}
-		}
-		if (command.contains("-e") || command.contains("-g")) {
-			String[] infos = command.split(" ");
-			String socialSecurityNumber = infos[1];
-			if (socialSecurityNumber.length() == 12) {
-				Record record = null;
-				try {
-					record = db.getRecord(socialSecurityNumber, user);
-				} catch (NullPointerException | AuthorizationException e) {
-					out.println(e.getMessage());
-					au.errorprintln(user, e.getMessage());
+		String[] infos = command.split(" ");
+		if(infos.length > 1){
+			if (command.contains("-h")) {
+				out.println("Example Get: -g SocialSecurityNumber");
+				out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
+				out.println("Example Edit: -e SocialSecurityNumber");
+			} 
+			if(command.contains("-r")){
+				String socialSecurityNumber = infos[1];
+				if (socialSecurityNumber.length() == 12) {
+					try {
+						db.removeRecord(user, socialSecurityNumber);
+						System.out.println("Successfully removed " + socialSecurityNumber);
+					} catch (NullPointerException | AuthorizationException e) {
+						out.println(e.getMessage());
+						au.errorprintln(user, e.getMessage());
+					}
 				}
-				if (record != null) {
-					out.println(record.toString());
-					if(command.contains("-e")){
-						
-						String firstName = null;
-						String surName = null;
-						int divisionID = -1;
-						String comment = null;
-						
-						out.println("What do you want to change? \n FirstName -fn, Surname -sn, Comment -co, Divison -di \nSocialSecurityNumber -scc, Quit -q");
-						out.println("listen");
-						String edit = in.readLine();
-						out.flush();
-						au.println(user,edit);
-						if(!edit.contains("-q")) {
-							String[] edits = edit.split(" ");
-							for (int i = 0; i < edits.length; i += 2) {
-								if (edits[i].contains("-co")) {
-									int index = i + 1;
-									comment = "";
-									while (index < edits.length
-											&& !edits[index].contains("-")) {
-										comment += " " + edits[index];
-										index++;
-									}
-									i = index - 2;
-								} else {
-									if (edits.length % 2 == 0){
-										String choice = edits[i];
-										String change = edits[i + 1];
-										if (choice.equals("-fn")) {
-											firstName = change;
-										} else if (choice.equals("-sn")) {
-											surName = change;
-										} else if (choice.equals("-di")) {
-											divisionID = new Integer(change);
-										} else if (choice.equals("-scc")) {
-											socialSecurityNumber = change;
-										} else {
-											out.println("Command " + choice
-													+ " not recognized");
+			}
+			if (command.contains("-p")) {
+				if(infos.length > 4){
+					String firstName = infos[1];
+					String surName = infos[2];
+					int divisionID = new Integer(infos[3]);
+					String socialSecurityNumber = infos[infos.length - 1];
+					ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
+					for (int i = 5; i < infos.length - 1; i++) {
+						nurseIDs.add(new Integer(infos[i]));
+					}
+					out.println("Add comment to record: ");
+					out.println("listen");
+					String comment = in.readLine();
+					au.println(user,comment);
+					out.flush();
+		
+					Record record = new Record(socialSecurityNumber, firstName,
+							surName, divisionID, comment);
+					try {
+						db.putRecord(user, record, divisionID, new Integer(
+								user.getID()), nurseIDs, socialSecurityNumber);
+						out.println("Record for " + socialSecurityNumber + " added");
+						au.println("Record for " + socialSecurityNumber + " added");
+					} catch (NumberFormatException | NullPointerException
+							| AuthorizationException e) {
+						out.println(e.getMessage());
+						au.errorprintln(user, e.getMessage());
+					}
+				} else {
+					out.println("Too few arguments");
+				}
+			}
+			if (command.contains("-e") || command.contains("-g")) {
+				String socialSecurityNumber = infos[1];
+				if (socialSecurityNumber.length() == 12) {
+					Record record = null;
+					try {
+						record = db.getRecord(socialSecurityNumber, user);
+					} catch (NullPointerException | AuthorizationException e) {
+						out.println(e.getMessage());
+						au.errorprintln(user, e.getMessage());
+					}
+					if (record != null) {
+						out.println(record.toString());
+						if(command.contains("-e")){
+							
+							String firstName = null;
+							String surName = null;
+							int divisionID = -1;
+							String comment = null;
+							
+							out.println("What do you want to change? \n FirstName -fn, Surname -sn, Comment -co, Divison -di \nSocialSecurityNumber -scc, Quit -q");
+							out.println("listen");
+							String edit = in.readLine();
+							out.flush();
+							au.println(user,edit);
+							if(!edit.contains("-q")) {
+								String[] edits = edit.split(" ");
+								for (int i = 0; i < edits.length; i += 2) {
+									if (edits[i].contains("-co")) {
+										int index = i + 1;
+										comment = "";
+										while (index < edits.length
+												&& !edits[index].contains("-")) {
+											comment += " " + edits[index];
+											index++;
+										}
+										i = index - 2;
+									} else {
+										if (edits.length % 2 == 0){
+											String choice = edits[i];
+											String change = edits[i + 1];
+											if (choice.equals("-fn")) {
+												firstName = change;
+											} else if (choice.equals("-sn")) {
+												surName = change;
+											} else if (choice.equals("-di")) {
+												divisionID = new Integer(change);
+											} else if (choice.equals("-scc")) {
+												socialSecurityNumber = change;
+											} else {
+												out.println("Command " + choice
+														+ " not recognized");
+											}
 										}
 									}
+								} 
+								record = new Record(socialSecurityNumber, firstName,
+										surName, divisionID, comment);
+								try {
+									db.editRecord(user, record,	socialSecurityNumber);
+									out.println("Record " + socialSecurityNumber + " edited");
+									au.println("Record " + socialSecurityNumber + " edited");
+								} catch (AuthorizationException | NullPointerException e){
+									out.println(e.getMessage());
+									au.errorprintln(user, e.getMessage());
 								}
-							} 
-							record = new Record(socialSecurityNumber, firstName,
-									surName, divisionID, comment);
-							try {
-								db.editRecord(user, record,	socialSecurityNumber);
-								out.println("Record " + socialSecurityNumber + " edited");
-								au.println("Record " + socialSecurityNumber + " edited");
-							} catch (AuthorizationException | NullPointerException e){
-								out.println(e.getMessage());
-								au.errorprintln(user, e.getMessage());
 							}
 						}
 					}
-				}
-			} else {
-				out.println("Wrong format, should be yyyyMMdd-xxxx. Try again");
-			} 
+				} else {
+					out.println("Wrong format, should be yyyyMMddxxxx. Try again");
+				} 
+			}
+		}else {
+			out.println("Command not recognized or no arguments");
 		}
 	}
 
