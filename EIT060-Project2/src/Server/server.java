@@ -31,31 +31,35 @@ public class server implements Runnable {
 		serverSocket = ss;
 		newListener();
 		clients = new HashMap<>();
-		au = new Auditer();;
+		au = new Auditer();
+		;
 		db = new Database(au);
 	}
-	
-	private void addUser(String subject){
+
+	private void addUser(String subject) {
 		String[] certifacateInfos = subject.split(",");
-		String userID = certifacateInfos[1].substring(4,certifacateInfos[1].length());
-		String name = certifacateInfos[0].substring(3,certifacateInfos[0].length());
-		int division = new Integer(certifacateInfos[2].substring(3,certifacateInfos[2].length()));
-		
-		if(userID.length() < 5){ 		//Not a Patient
+		String userID = certifacateInfos[1].substring(4,
+				certifacateInfos[1].length());
+		String name = certifacateInfos[0].substring(3,
+				certifacateInfos[0].length());
+		int division = new Integer(certifacateInfos[2].substring(3,
+				certifacateInfos[2].length()));
+
+		if (userID.length() < 5) { // Not a Patient
 			int userType = new Integer(userID);
-			if(userType < 1000){
+			if (userType < 1000) {
 				clients.put(userID, (new Government(userID, name)));
 			} else {
-				if(userType < 2000){
+				if (userType < 2000) {
 					clients.put(userID, (new Doctor(userID, name, division)));
 				} else {
 					clients.put(userID, (new Nurse(userID, name, division)));
 				}
 			}
-		} else{
+		} else {
 			clients.put(userID, (new Patient(userID, name)));
 		}
-		
+
 	}
 
 	public void run() {
@@ -72,27 +76,25 @@ public class server implements Runnable {
 
 			numConnectedClients++;
 			au.println("New client connected");
-			au.println("client name (cert subject DN field): "
-					+ subject + "\n" + "issuer name(cert issuer DN field): "
-					+ issuer);
-			
+			au.println("client name (cert subject DN field): " + subject + "\n"
+					+ "issuer name(cert issuer DN field): " + issuer);
+
 			addUser(subject);
-			
 
 			au.println("Serial number: " + serial);
 
-			au.println(numConnectedClients
-					+ " concurrent connection(s)\n");
+			au.println(numConnectedClients + " concurrent connection(s)\n");
 
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(
 					socket.getInputStream()));
-			
+
 			String clientMsg = null;
 			String clientID = null;
 			while ((clientMsg = in.readLine()) != null) {
 				String[] certifacateInfos = subject.split(",");
-				clientID = certifacateInfos[1].substring(4,certifacateInfos[1].length());
+				clientID = certifacateInfos[1].substring(4,
+						certifacateInfos[1].length());
 				takeInput(clientMsg, clientID);
 				out.println("listen");
 				out.flush();
@@ -103,33 +105,28 @@ public class server implements Runnable {
 			socket.close();
 			numConnectedClients--;
 			au.println("client " + clientID + " disconnected");
-			au.println(numConnectedClients
-					+ " concurrent connection(s)\n");
+			au.println(numConnectedClients + " concurrent connection(s)\n");
 		} catch (IOException e) {
 			au.println("Client died: " + e.getMessage());
 			e.printStackTrace();
 			return;
 		}
 	}
-	
 
-	synchronized private void takeInput(String clientMsg, String clientID) throws IOException {
+	synchronized private void takeInput(String clientMsg, String clientID)
+			throws IOException {
 		String command = clientMsg;
 		User user = clients.get(clientID);
 		au.println(user, clientMsg);
 		String[] infos = command.split(" ");
-		if(infos.length > 1){
-			if (command.contains("-h")) {
-				out.println("Example Get: -g SocialSecurityNumber");
-				out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
-				out.println("Example Edit: -e SocialSecurityNumber");
-			} 
-			if(command.contains("-r")){
+		if (infos.length > 1) {
+			if (command.contains("-r")) {
 				String socialSecurityNumber = infos[1];
 				if (socialSecurityNumber.length() == 12) {
 					try {
 						db.removeRecord(user, socialSecurityNumber);
-						System.out.println("Successfully removed " + socialSecurityNumber);
+						System.out.println("Successfully removed "
+								+ socialSecurityNumber);
 					} catch (NullPointerException | AuthorizationException e) {
 						out.println(e.getMessage());
 						au.errorprintln(user, e.getMessage());
@@ -137,7 +134,7 @@ public class server implements Runnable {
 				}
 			}
 			if (command.contains("-p")) {
-				if(infos.length > 4){
+				if (infos.length > 4) {
 					String firstName = infos[1];
 					String surName = infos[2];
 					int divisionID = new Integer(infos[3]);
@@ -149,16 +146,19 @@ public class server implements Runnable {
 					out.println("Add comment to record: ");
 					out.println("listen");
 					String comment = in.readLine();
-					au.println(user,comment);
+					au.println(user, comment);
 					out.flush();
-		
+
 					Record record = new Record(socialSecurityNumber, firstName,
 							surName, divisionID, comment);
 					try {
-						db.putRecord(user, record, divisionID, new Integer(
-								user.getID()), nurseIDs, socialSecurityNumber);
-						out.println("Record for " + socialSecurityNumber + " added");
-						au.println("Record for " + socialSecurityNumber + " added");
+						db.putRecord(user, record, divisionID,
+								new Integer(user.getID()), nurseIDs,
+								socialSecurityNumber);
+						out.println("Record for " + socialSecurityNumber
+								+ " added");
+						au.println("Record for " + socialSecurityNumber
+								+ " added");
 					} catch (NumberFormatException | NullPointerException
 							| AuthorizationException e) {
 						out.println(e.getMessage());
@@ -180,19 +180,19 @@ public class server implements Runnable {
 					}
 					if (record != null) {
 						out.println(record.toString());
-						if(command.contains("-e")){
-							
+						if (command.contains("-e")) {
+
 							String firstName = null;
 							String surName = null;
 							int divisionID = -1;
 							String comment = null;
-							
+
 							out.println("What do you want to change? \n FirstName -fn, Surname -sn, Comment -co, Divison -di \nSocialSecurityNumber -scc, Quit -q");
 							out.println("listen");
 							String edit = in.readLine();
 							out.flush();
-							au.println(user,edit);
-							if(!edit.contains("-q")) {
+							au.println(user, edit);
+							if (!edit.contains("-q")) {
 								String[] edits = edit.split(" ");
 								for (int i = 0; i < edits.length; i += 2) {
 									if (edits[i].contains("-co")) {
@@ -205,7 +205,7 @@ public class server implements Runnable {
 										}
 										i = index - 2;
 									} else {
-										if (edits.length % 2 == 0){
+										if (edits.length % 2 == 0) {
 											String choice = edits[i];
 											String change = edits[i + 1];
 											if (choice.equals("-fn")) {
@@ -222,14 +222,18 @@ public class server implements Runnable {
 											}
 										}
 									}
-								} 
-								record = new Record(socialSecurityNumber, firstName,
-										surName, divisionID, comment);
+								}
+								record = new Record(socialSecurityNumber,
+										firstName, surName, divisionID, comment);
 								try {
-									db.editRecord(user, record,	socialSecurityNumber);
-									out.println("Record " + socialSecurityNumber + " edited");
-									au.println("Record " + socialSecurityNumber + " edited");
-								} catch (AuthorizationException | NullPointerException e){
+									db.editRecord(user, record,
+											socialSecurityNumber);
+									out.println("Record "
+											+ socialSecurityNumber + " edited");
+									au.println("Record " + socialSecurityNumber
+											+ " edited");
+								} catch (AuthorizationException
+										| NullPointerException e) {
 									out.println(e.getMessage());
 									au.errorprintln(user, e.getMessage());
 								}
@@ -238,10 +242,41 @@ public class server implements Runnable {
 					}
 				} else {
 					out.println("Wrong format, should be yyyyMMddxxxx. Try again");
-				} 
+				}
+			} 
+			
+		} else {
+			if (command.contains("-h")) {
+				out.println("Example Get: -g SocialSecurityNumber");
+				out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
+				out.println("Example Edit: -e SocialSecurityNumber");
+				out.println("Example Remove: -r SocialSecurityNumber");
+				out.println("Example Print All: -pa");
 			}
-		}else {
-			out.println("Command not recognized or no arguments");
+			if (command.contains("-pa")) {
+				try {
+					StringBuilder stars = new StringBuilder();
+					StringBuilder divider = new StringBuilder();
+					ArrayList<Record> records = db.getAllAvailabe(user);
+					for (int i = 0; i < 115; i++) {
+						stars.append("*");
+						divider.append("-");
+					}
+					out.print(stars + "\n");
+					out.printf(String.format("%-1s %-15s %-15s %-25s %-30s %24s %s", "*", "First Name", "Surname", "Social Security Number","Comment","*","\n"));
+					out.print("*" + divider.substring(2) + "*\n");
+					for (Record r : records) {
+						out.printf(String.format("%-1s %-15s %-15s %-25s %-30s %24s %s","*", r.getFirstName(), r.getSurName(), r.getID(), r.getComment().trim(), "*", "\n"));
+					}
+					out.println(stars);
+				} catch (AuthorizationException | NullPointerException e) {
+					au.println(e.getMessage());
+					out.println(e.getMessage());
+				}
+
+			} else {
+				out.println("Command not recognized or no arguments");
+			}
 		}
 	}
 

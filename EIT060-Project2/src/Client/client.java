@@ -42,6 +42,7 @@ public class client {
 		URL tempLoc = server.class.getProtectionDomain().getCodeSource().getLocation();
 		String loc = "" + tempLoc;
 		loc = loc.substring(5, loc.length() - 5);
+		SSLSocketFactory factory = null;
 
 		while (login) {
 			try {
@@ -55,43 +56,45 @@ public class client {
 				keyfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "_keystore");
 				trustfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "_truststore");
 				
-				login = false;
+				//SSLSocketFactory factory = null;
+				try {
+					char[] pass = passwd.toCharArray();
+					
+					KeyStore ks = KeyStore.getInstance("JKS");
+					KeyStore ts = KeyStore.getInstance("JKS");
+					
+					KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+					TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+					
+					SSLContext ctx = SSLContext.getInstance("TLS");
+
+					/** Set and trim path to folders */
+					URL tempLocation = server.class.getProtectionDomain().getCodeSource().getLocation();
+					String location = "" + tempLocation;
+					location = location.substring(5, location.length() - 5);
+
+					ks.load(keyfile, pass); // keystore
+											// password
+											// (storepass)
+					ts.load(trustfile, pass); // truststore
+												// password
+												// (storepass);
+					kmf.init(ks, pass); // user password (keypass)
+					tmf.init(ts); // keystore can be used as truststore here
+					ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+					factory = ctx.getSocketFactory();
+					login = false;
+				} catch (Exception e) {
+					System.out.println("Incorrect password");
+				}
 			} catch (FileNotFoundException e) {
-				System.out.println("You entered the wrong social security number or password. Please try again.");
+				System.out.println("Username does not exist. Please try again.");
 			}
 		}
 
 		try { /* set up a key manager for client authentication */
-			SSLSocketFactory factory = null;
-			try {
-				char[] pass = passwd.toCharArray();
-				
-				KeyStore ks = KeyStore.getInstance("JKS");
-				KeyStore ts = KeyStore.getInstance("JKS");
-				
-				KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-				TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-				
-				SSLContext ctx = SSLContext.getInstance("TLS");
-
-				/** Set and trim path to folders */
-				URL tempLocation = server.class.getProtectionDomain().getCodeSource().getLocation();
-				String location = "" + tempLocation;
-				location = location.substring(5, location.length() - 5);
-
-				ks.load(keyfile, pass); // keystore
-										// password
-										// (storepass)
-				ts.load(trustfile, pass); // truststore
-											// password
-											// (storepass);
-				kmf.init(ks, pass); // user password (keypass)
-				tmf.init(ts); // keystore can be used as truststore here
-				ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-				factory = ctx.getSocketFactory();
-			} catch (Exception e) {
-				throw new IOException(e.getMessage());
-			}
+			
+			
 			SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
 			System.out.println("\nsocket before handshake:\n" + socket + "\n");
 
@@ -121,7 +124,7 @@ public class client {
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			String msg;
 			System.out.println("Succesful login! Type a command in the prompt and press enter.");
-			System.out.println("Get -g, Put -p, Edit -e, Help -h");
+			System.out.println("Get -g, Put -p, Edit -e, Help -h, -r Remove, -pa Print All");
 			for (;;) {
 				System.out.print(">");
 				msg = read.readLine();
@@ -161,7 +164,7 @@ public class client {
 			read.close();
 			socket.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Wrong password or username. Client exit");
 		}
 	}
 

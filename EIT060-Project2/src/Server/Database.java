@@ -331,37 +331,28 @@ public class Database {
 		
 	}
 	
-	public void printAllAvailabe(User user, int divisionID) throws AuthorizationException{
-		ArrayList<Record> records = null;
-		try{
-			records = getAllAvailabe(user, divisionID);
-			
-		} catch (AuthorizationException e){
-			throw e;
-		}
-	}
-	
-	private ArrayList<Record> getAllAvailabe(User user, int divisionID) throws AuthorizationException{
+	public ArrayList<Record> getAllAvailabe(User user) throws AuthorizationException{
 		ArrayList<Record> tempRecords = new ArrayList<>();
 		Iterator it = records.entrySet().iterator();
 
-        Map.Entry pair = (Map.Entry)it.next();
+		Map.Entry pair = null;
 		if(user instanceof Government){
 			while (it.hasNext()) {
+				pair = (Map.Entry)it.next();
 		        tempRecords.add(((RecordEntry)pair.getValue()).getRecord());
-		        it.remove(); // avoids a ConcurrentModificationException
 		    }
 		} else if (user instanceof Doctor){
 			while (it.hasNext()) {
-		        RecordEntry re = (RecordEntry)pair.getValue();
+				pair = (Map.Entry)it.next();
+				RecordEntry re = (RecordEntry)pair.getValue();
 		        if(re.getDivisionID() == ((Doctor)user).getDivisionID()){
 		        	tempRecords.add(re.getRecord());
 		        }
-		        it.remove(); // avoids a ConcurrentModificationException
 		    }
 		} else if(user instanceof Nurse){
 			while (it.hasNext()) {
-		        RecordEntry re = (RecordEntry)pair.getValue();
+				pair = (Map.Entry)it.next();
+				RecordEntry re = (RecordEntry)pair.getValue();
 		        ArrayList<Integer> nurseIDs = re.getNurseIDs();
 		        for(int nurseID : nurseIDs){
 			        if(nurseID == new Integer(((Nurse)user).getID())){
@@ -369,7 +360,6 @@ public class Database {
 			        	break;
 			        }
 		        }
-		        it.remove(); // avoids a ConcurrentModificationException
 		    }
 		} else {
 			throw new AuthorizationException("You are not allowed to do that");
