@@ -24,6 +24,7 @@ public class server implements Runnable {
 	private Database db;
 	private BufferedReader in;
 	private HashMap<String, User> clients;
+	private ArrayList<String> connectedClients;
 	private PrintWriter out;
 	private Auditer au;
 
@@ -34,6 +35,7 @@ public class server implements Runnable {
 		au = new Auditer();
 		;
 		db = new Database(au);
+		connectedClients = new ArrayList<>();
 	}
 
 	private void addUser(String subject) {
@@ -74,6 +76,17 @@ public class server implements Runnable {
 			String issuer = cert.getIssuerDN().getName();
 			String serial = cert.getSerialNumber().toString();
 
+			out = new PrintWriter(socket.getOutputStream(), true);
+			in = new BufferedReader(new InputStreamReader(
+					socket.getInputStream()));
+
+			
+			if(connectedClients.contains(serial)){
+				out.println("notAllowed");
+				throw new Exception("Client with serial " +serial+" already connected");
+			}
+			connectedClients.add(serial);
+
 			numConnectedClients++;
 			au.println("New client connected");
 			au.println("client name (cert subject DN field): " + subject + "\n"
@@ -84,32 +97,26 @@ public class server implements Runnable {
 			au.println("Serial number: " + serial);
 
 			au.println(numConnectedClients + " concurrent connection(s)\n");
-
-			out = new PrintWriter(socket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(
-					socket.getInputStream()));
-
+			
+			out.flush();
 			String clientMsg = null;
-			String clientID = null;
 			while ((clientMsg = in.readLine()) != null) {
 				String[] certifacateInfos = subject.split(",");
-				clientID = certifacateInfos[1].substring(4,
+				String clientID = clientID = certifacateInfos[1].substring(4,
 						certifacateInfos[1].length());
 				takeInput(clientMsg, clientID);
 				out.println("listen");
 				out.flush();
 			}
-
+			connectedClients.remove(serial);
 			in.close();
 			out.close();
 			socket.close();
 			numConnectedClients--;
-			au.println("client " + clientID + " disconnected");
+			au.println("client disconnected");
 			au.println(numConnectedClients + " concurrent connection(s)\n");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			au.println("Client died: " + e.getMessage());
-			e.printStackTrace();
-			return;
 		}
 	}
 
@@ -258,15 +265,15 @@ public class server implements Runnable {
 					StringBuilder stars = new StringBuilder();
 					StringBuilder divider = new StringBuilder();
 					ArrayList<Record> records = db.getAllAvailabe(user);
-					for (int i = 0; i < 115; i++) {
+					for (int i = 0; i < 126; i++) {
 						stars.append("*");
 						divider.append("-");
 					}
 					out.print(stars + "\n");
-					out.printf(String.format("%-1s %-15s %-15s %-25s %-30s %24s %s", "*", "First Name", "Surname", "Social Security Number","Comment","*","\n"));
+					out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-30s %24s %s", "*", "First Name", "Surname", "Division", "Social Security Number","Comment","*","\n"));
 					out.print("*" + divider.substring(2) + "*\n");
 					for (Record r : records) {
-						out.printf(String.format("%-1s %-15s %-15s %-25s %-30s %24s %s","*", r.getFirstName(), r.getSurName(), r.getID(), r.getComment().trim(), "*", "\n"));
+						out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-30s %24s %s","*", r.getFirstName(), r.getSurName(), r.getDivisionID(), r.getID(), r.getComment().trim(), "*", "\n"));
 					}
 					out.println(stars);
 				} catch (AuthorizationException | NullPointerException e) {

@@ -46,7 +46,7 @@ public class client {
 
 		while (login) {
 			try {
-				System.out.println("Social security number: ");
+				System.out.println("UserID: ");
 				userPath = scan.nextLine();
 	
 				/*Users keystore password is entered*/
@@ -112,41 +112,38 @@ public class client {
 
 			String issuer = cert.getIssuerDN().getName();
 			String serial = cert.getSerialNumber().toString();
+			
+			
 
-			System.out.println("certificate name (subject DN field) on certificate received from server:\n" + subject
-					+ "\n" + "issuer name (issuer DN field) on certificate received from server:\n" + issuer);
-			System.out.println("Serial number: " + serial);
-			System.out.println("socket after handshake:\n" + socket + "\n");
-			System.out.println("secure connection established\n\n");
+
+
 
 			BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			String msg;
+			String allowed = in.readLine();
+			if(allowed.equalsIgnoreCase("notAllowed")){
+				throw new LoginException("User already logged in");
+			}
+			
+			System.out.println("certificate name (subject DN field) on certificate received from server:\n" + subject
+					+ "\n" + "issuer name (issuer DN field) on certificate received from server:\n" + issuer);
+			System.out.println("Serial number: " + serial);
+			System.out.println("socket after handshake:\n" + socket + "\n");
+			System.out.println("secure connection established\n\n");
+			
 			System.out.println("Succesful login! Type a command in the prompt and press enter.");
-			System.out.println("Get -g, Put -p, Edit -e, Help -h, -r Remove, -pa Print All");
+			System.out.println("Get -g, Put -p, Edit -e, Help -h, -r Remove, -pa Print All, Logout logout, Quit quit");
+			
 			for (;;) {
 				System.out.print(">");
 				msg = read.readLine();
-				if (msg.equalsIgnoreCase("quit")) {
+				if (msg.equalsIgnoreCase("quit") || msg.equalsIgnoreCase("logout")) {
 					break;
 				}
-				//System.out.print("sending '" + msg + "' to server...");
 				out.println(msg);
 				out.flush();
-				//System.out.println("done");
-				
-				
-				//System.out.println("Recieved from server: ");
-				/*
-				String inLine = read.readLine();
-				System.out.println(inLine);
-				while(!inLine.equals("listen") && inLine !=null){
-						System.out.println(inLine);
-						inLine = read.readLine();
-				}
-				System.out.println("Nu börjar vi om");
-				*/
 				String fromServer;
 				while ((fromServer = in.readLine()) != null) {
 				    if (fromServer.equals("listen")){
@@ -158,14 +155,31 @@ public class client {
 				
 				
 			}
-			System.out.println("Avslutade");
-			in.close();
-			out.close();
-			read.close();
-			socket.close();
-		} catch (Exception e) {
-			System.out.println("Wrong password or username. Client exit");
+			if(msg.equals("logout")){
+				System.out.println("Logout out");
+				socket.close();
+				in.close();
+				out.close();
+				main(null);
+			} else {
+				System.out.println("Avslutade");
+				socket.close();
+				in.close();
+				out.close();
+				read.close();
+			}
+		} catch (LoginException e) {
+			System.out.println(e.getMessage());
+			main(null);
 		}
 	}
+	static public class LoginException extends Exception {
+		  public LoginException() { super(); }
+		  public LoginException(String message) { super(message); }
+		  public LoginException(String message, Throwable cause) { super(message, cause); }
+		  public LoginException(Throwable cause) { super(cause); }
+		}
+	
+	
 
 }

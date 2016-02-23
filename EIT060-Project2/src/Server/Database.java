@@ -423,6 +423,7 @@ public class Database {
 				throw new AuthorizationException("Patients are not allowed to edit records");
 			} else {
 				if (user instanceof Government) {
+					success = true;
 					records.remove(socialSecurityNumber);
 					records.put(socialSecurityNumber, editedRecordEntry);
 				} else if (user instanceof Doctor) {
