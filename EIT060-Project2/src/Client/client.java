@@ -1,6 +1,7 @@
 package Client;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,7 +31,12 @@ import Server.server;
  */
 public class client {
 
+
 	public static void main(String[] args) throws Exception {
+		new client().init();
+	}
+	
+	public void init() throws IOException{
 		String host = "localhost";
 		int port = 9876;
 		String passwd = "";
@@ -43,15 +49,17 @@ public class client {
 		String loc = "" + tempLoc;
 		loc = loc.substring(5, loc.length() - 5);
 		SSLSocketFactory factory = null;
-
+		Console console = System.console();
+		
 		while (login) {
 			try {
 				System.out.println("UserID: ");
 				userPath = scan.nextLine();
 	
 				/*Users keystore password is entered*/
-				System.out.println("Password: ");
-				passwd = scan.nextLine();
+				char[] password = console.readPassword("Password: ");
+				passwd = new String(password);
+				
 				
 				keyfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "_keystore");
 				trustfile = new FileInputStream(loc + "/certificates/Users/" + userPath + "/" + userPath + "_truststore");
@@ -125,7 +133,7 @@ public class client {
 			String allowed = in.readLine();
 			if(allowed.equalsIgnoreCase("notAllowed")){
 				throw new LoginException("User already logged in");
-			}
+			} 
 			
 			System.out.println("certificate name (subject DN field) on certificate received from server:\n" + subject
 					+ "\n" + "issuer name (issuer DN field) on certificate received from server:\n" + issuer);
@@ -160,7 +168,7 @@ public class client {
 				socket.close();
 				in.close();
 				out.close();
-				main(null);
+				init();
 			} else {
 				System.out.println("Avslutade");
 				socket.close();
@@ -170,10 +178,10 @@ public class client {
 			}
 		} catch (LoginException e) {
 			System.out.println(e.getMessage());
-			main(null);
+			init();
 		}
 	}
-	static public class LoginException extends Exception {
+	public class LoginException extends Exception {
 		  public LoginException() { super(); }
 		  public LoginException(String message) { super(message); }
 		  public LoginException(String message, Throwable cause) { super(message, cause); }

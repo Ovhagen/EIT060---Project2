@@ -84,6 +84,8 @@ public class server implements Runnable {
 			if(connectedClients.contains(serial)){
 				out.println("notAllowed");
 				throw new Exception("Client with serial " +serial+" already connected");
+			} else {
+				out.println("allowed");
 			}
 			connectedClients.add(serial);
 
