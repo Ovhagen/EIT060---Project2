@@ -36,8 +36,10 @@ public class Database {
 	private HashMap<String, RecordEntry> records;
 	private File file;
 	private String location;
+	private Auditer au;
 
-	public Database() {
+	public Database(Auditer au) {
+		this.au = au;
 		records = new HashMap<String, RecordEntry>();
 		users = new ArrayList<>();
 		
@@ -49,14 +51,14 @@ public class Database {
 		if(file == null){
 			file = new File(location + "DataBase/DataBase-infoFile.txt");
 		} else {
-			System.out.println("Loading database " + file.getName());
+			au.println("Loading database " + file.getName());
 			loadDataBase();
 		}
 	}
 
 
 
-	private void loadDataBase() {
+	synchronized private void loadDataBase() {
 		Scanner scan = null;
 		try {
 			scan = new Scanner(file);
@@ -132,7 +134,7 @@ public class Database {
 
 	}
 
-	private void removeOldestFile(){
+	synchronized private void removeOldestFile(){
 		File folder = new File(location + "/Database");
 		File[] listOfFiles = folder.listFiles();
 		long fileToRemove = Long.MAX_VALUE;
@@ -150,7 +152,7 @@ public class Database {
 			File file = new File(location + "/Database/DataBase" + fileToRemove);
 			boolean deleted = file.delete();
 			if(deleted){
-				System.out.println("DataBase" + fileToRemove + " was deleted");
+				au.println("DataBase" + fileToRemove + " was deleted");
 			}
 		}
 		
@@ -178,7 +180,7 @@ public class Database {
 		
 	}
 	
-	public void saveDataBase() throws IOException {
+	synchronized public void saveDataBase() throws IOException {
 		File file = new File(location + "/Database/DataBase-infoFile.txt");
 		BufferedReader scan = null;
 		try {
@@ -246,7 +248,7 @@ public class Database {
 			}
 		}
 		writer.close();
-		System.out.println("Database" + todaysDate + " was created.");
+		au.println("Database" + todaysDate + " was created.");
 		removeOldestFile();
 	}
 
@@ -270,20 +272,26 @@ public class Database {
 	}
 	
 	public RecordEntry getRecordEntry(String socialSecurityNumber, User user) throws NullPointerException, AuthorizationException {
-		RecordEntry re = records.get(socialSecurityNumber);
-		if (user instanceof Government) {
-			return re;
-		} else if (user instanceof Employee) {
-			Employee employee = (Employee) user;
-			if (employee.getDivisionID() == re.getDivisionID()) {
-				return re;
+		try {
+			RecordEntry re = null;
+			if (user instanceof Government) {
+				re = records.get(socialSecurityNumber);
+			} else if (user instanceof Employee) {
+				Employee employee = (Employee) user;
+				re = records.get(socialSecurityNumber);
+				if (employee.getDivisionID() != re.getDivisionID()) {
+					throw new AuthorizationException("You do not have permission to see that record");
+				}
+			} else {
+				re = records.get(socialSecurityNumber);
+				if (!re.getSocialSecurityNumber().equals(user.getID())){
+					throw new AuthorizationException("You do not have permission to see that record");
+				}
 			}
-		} else if (re.getSocialSecurityNumber().equals(user.getID())) {
 			return re;
-		} else {
-			throw new AuthorizationException("You do not have permission to see that record");
+		} catch(NullPointerException e) {
+			throw e;
 		}
-		return null;
 	}
 
 	public void addUser(User user){
@@ -357,7 +365,7 @@ public class Database {
 					records.remove(socialSecurityNumber);
 					records.put(socialSecurityNumber, editedRecordEntry);
 				} else if (user instanceof Doctor) {
-					if (new Integer(user.getID()) == oldRecordEntry.getDoctorID()) {
+					if (new Integer(((Doctor) user).getDivisionID()) == oldRecordEntry.getDivisionID()) {
 						records.remove(socialSecurityNumber);
 						records.put(socialSecurityNumber, editedRecordEntry);
 					} else {
@@ -373,12 +381,6 @@ public class Database {
 							throw new AuthorizationException("This is not your patient, Nurse " + user.getName());
 						}
 					}
-				}
-				try {
-					saveDataBase();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 		} catch (NullPointerException e){

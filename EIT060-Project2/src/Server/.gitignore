@@ -4,3 +4,5 @@
 /server.class
 /TestClass.class
 /Database$AuthorizationException.class
+/Auditer.class
+/Auditable.class

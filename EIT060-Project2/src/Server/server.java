@@ -22,42 +22,38 @@ public class server implements Runnable {
 	private ServerSocket serverSocket = null;
 	private static int numConnectedClients = 0;
 	private Database db;
-	private User user;
 	private BufferedReader in;
 	private HashMap<String, User> clients;
 	private PrintWriter out;
+	private Auditer au;
 
 	public server(ServerSocket ss) throws IOException {
 		serverSocket = ss;
 		newListener();
-		db = new Database();
 		clients = new HashMap<>();
-		User user = null;
+		au = new Auditer();;
+		db = new Database(au);
 	}
 	
 	private void addUser(String subject){
 		String[] certifacateInfos = subject.split(",");
 		String userID = certifacateInfos[1].substring(4,certifacateInfos[1].length());
-		String name = certifacateInfos[0].substring(4,certifacateInfos[0].length());
-		int division = 2;
+		String name = certifacateInfos[0].substring(3,certifacateInfos[0].length());
+		int division = new Integer(certifacateInfos[2].substring(3,certifacateInfos[2].length()));
 		
 		if(userID.length() < 5){ 		//Not a Patient
 			int userType = new Integer(userID);
 			if(userType < 1000){
-				user = new Government(userID, name);
 				clients.put(userID, (new Government(userID, name)));
 			} else {
 				if(userType < 2000){
-					user = new Doctor(userID, name, division);
 					clients.put(userID, (new Doctor(userID, name, division)));
 				} else {
-					user = new Nurse(userID, name, division);
 					clients.put(userID, (new Nurse(userID, name, division)));
 				}
 			}
 		} else{
-			user = new Patient("19" + userID, name);
-			clients.put(userID, (new Patient("19" + userID, name)));
+			clients.put(userID, (new Patient(userID, name)));
 		}
 		
 	}
@@ -75,17 +71,17 @@ public class server implements Runnable {
 			String serial = cert.getSerialNumber().toString();
 
 			numConnectedClients++;
-			System.out.println("client connected");
-			System.out.println("client name (cert subject DN field): "
+			au.println("New client connected");
+			au.println("client name (cert subject DN field): "
 					+ subject + "\n" + "issuer name(cert issuer DN field): "
 					+ issuer);
 			
 			addUser(subject);
 			
 
-			System.out.println("Serial number: " + serial);
+			au.println("Serial number: " + serial);
 
-			System.out.println(numConnectedClients
+			au.println(numConnectedClients
 					+ " concurrent connection(s)\n");
 
 			out = new PrintWriter(socket.getOutputStream(), true);
@@ -93,32 +89,34 @@ public class server implements Runnable {
 					socket.getInputStream()));
 			
 			String clientMsg = null;
+			String clientID = null;
 			while ((clientMsg = in.readLine()) != null) {
-				System.out.println("received '" + clientMsg + "' from client");
-				
-				//out.println("listen");
-				takeInput(clientMsg);
+				String[] certifacateInfos = subject.split(",");
+				clientID = certifacateInfos[1].substring(4,certifacateInfos[1].length());
+				takeInput(clientMsg, clientID);
 				out.println("listen");
 				out.flush();
-				System.out.println("done\n");
 			}
 
 			in.close();
 			out.close();
 			socket.close();
 			numConnectedClients--;
-			System.out.println("client disconnected");
-			System.out.println(numConnectedClients
+			au.println("client " + clientID + " disconnected");
+			au.println(numConnectedClients
 					+ " concurrent connection(s)\n");
 		} catch (IOException e) {
-			System.out.println("Client died: " + e.getMessage());
+			au.println("Client died: " + e.getMessage());
 			e.printStackTrace();
 			return;
 		}
 	}
+	
 
-	private void takeInput(String clientMsg) throws IOException {
+	synchronized private void takeInput(String clientMsg, String clientID) throws IOException {
 		String command = clientMsg;
+		User user = clients.get(clientID);
+		au.println(user, clientMsg);
 		if (command.contains("-h")) {
 			out.println("Example Get: -g SocialSecurityNumber");
 			out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
@@ -137,7 +135,7 @@ public class server implements Runnable {
 			out.println("Add comment to record: ");
 			out.println("listen");
 			String comment = in.readLine();
-			System.out.println("Recieved " + comment + " from client");
+			au.println(user,comment);
 			out.flush();
 
 			Record record = new Record(socialSecurityNumber, firstName,
@@ -145,11 +143,12 @@ public class server implements Runnable {
 			try {
 				db.putRecord(user, record, divisionID, new Integer(
 						user.getID()), nurseIDs, socialSecurityNumber);
-				out.println("Record added");
-				System.out.println("Record added");
+				out.println("Record for " + socialSecurityNumber + " added");
+				au.println("Record for " + socialSecurityNumber + " added");
 			} catch (NumberFormatException | NullPointerException
 					| AuthorizationException e) {
 				out.println(e.getMessage());
+				au.errorprintln(user, e.getMessage());
 			}
 		}
 		if (command.contains("-e") || command.contains("-g")) {
@@ -161,6 +160,7 @@ public class server implements Runnable {
 					record = db.getRecord(socialSecurityNumber, user);
 				} catch (NullPointerException | AuthorizationException e) {
 					out.println(e.getMessage());
+					au.errorprintln(user, e.getMessage());
 				}
 				if (record != null) {
 					out.println(record.toString());
@@ -175,8 +175,8 @@ public class server implements Runnable {
 						out.println("listen");
 						String edit = in.readLine();
 						out.flush();
-						System.out.println("Recieved " + edit + " from client");
-						while(!edit.contains("-q")) {
+						au.println(user,edit);
+						if(!edit.contains("-q")) {
 							String[] edits = edit.split(" ");
 							for (int i = 0; i < edits.length; i += 2) {
 								if (edits[i].contains("-co")) {
@@ -211,11 +211,11 @@ public class server implements Runnable {
 									surName, divisionID, comment);
 							try {
 								db.editRecord(user, record,	socialSecurityNumber);
-								out.println("Record edited");
-								System.out.println("Record edited");
+								out.println("Record " + socialSecurityNumber + " edited");
+								au.println("Record " + socialSecurityNumber + " edited");
 							} catch (AuthorizationException | NullPointerException e){
 								out.println(e.getMessage());
-								break;
+								au.errorprintln(user, e.getMessage());
 							}
 						}
 					}

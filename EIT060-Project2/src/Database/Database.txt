@@ -7,7 +7,7 @@
 /** PersonalSeuciriyNumber;First Name; Surname; Division;Comment;DoctorID...;NurseID...
 -Users
 G;0001;Stefan Löfven;
-D;1001;Dr Per Hansson;1
+D;1001;Rolf Hansson;1
 D;1002;Dr Lena Andersson;2
 D;1003;Dr Bertil Svensson;2
 N;2001;Kalle Ekdahl;1
