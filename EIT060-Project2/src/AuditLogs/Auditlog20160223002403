@@ -1,0 +1,32 @@
+
+Server started at 23/02/2016 00:24:03
+client connected
+client name (cert subject DN field): CN=Christoffer MacFie, OU=199403034375, O=1, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+Serial number: 12402813572523847029
+1 concurrent connection(s)
+
+received '-g 199403034375' from 199403034375
+done
+
+received '-e 199403034375' from 199403034375
+Recieved -co Han har blivit biten av en orm from client
+done
+
+received '-q' from 199403034375
+done
+
+client connected
+client name (cert subject DN field): CN=Rolf Hansson, OU=1001, O=1, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+Serial number: 12402813572523847028
+2 concurrent connection(s)
+
+received '-g 199302281429' from 1001
+done
+
+received 'exit' from 199403034375
+done
+
+received '-g 196612285514' from 1001
+done

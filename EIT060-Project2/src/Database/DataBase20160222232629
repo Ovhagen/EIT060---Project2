@@ -1,0 +1,47 @@
+/** Users */
+/** G = Government, D = Doctor, N = Nurse, P = Patient */
+/** Government IDs begin with 0---; Doctor IDs begin with 1---, Nurse IDs begin with 2--- */
+/** UserType;UserID;Full Name;Division
+
+/** Database */
+/** PersonalSeuciriyNumber;First Name; Surname; Division;Comment;DoctorID...;NurseID...
+-Users
+G;0001;Stefan Löfven
+D;1001;Dr Per Hansson;1
+D;1002;Dr Lena Andersson;2
+D;1003;Dr Bertil Svensson;2
+N;2001;Kalle Ekdahl;1
+N;2002;Hanna Adelström;1
+N;2003;Johanna Qvist;1
+N;2004;Moa Sandgren;2
+N;2005;Filip Karlsson;2
+N;2006;Viggo Larsen;2
+P;5008042722;Inga-Lill Sjödahl
+P;196612285514;Ejnar Krook
+P;198408171144;Berth Ahlgren
+P;199501284412;Catharina Lind
+P;196506111871;Pär Vesterberg
+P;198812143325;Lillian Lans
+P;192810111314;Julia Olovsson
+D;1006;Mantis Tobagan;2
+P;199403034375;bob Bobssson
+P;199901010000;Bosse Svensson
+P;199801010101;Anna Annasson
+P;199701012222;Bob Bobsson
+P;199601020011;Hacke Hackspett
+P;199112131122;Bob Hansson
+P;199801054412;Lina Svensson
+P;199302281429;Magnus Svensson
+-Records
+196612285514;Inga Lill;Sjödahl;1;Lätt Feber;-1;2002
+198408171144;Berth;Ahlgren;1; Stukad handled;-1;2003
+199501284412;Catharina;Lind;1;Hjärnskakning;-1;2003
+196506111871;Pär;Vesterberg;2;Lider av allvarlig hemlängtan;-1;2005
+198812143325;Lillian;Lans;2;Ska föda barn;-1;2006
+192810111314;Julia;Olovsson;2;Brutit höftbenet;-1;2006
+199403034375;Josef;MacFie;2; Han har blivit biten av en hund;1006
+199901010000;Bosse;Svensson;2;Han ska opereras imorgon;-1;2005
+199801010101;Anna;Annasson;2;Hon har stukat foten;1006
+199701012222;Bob;Bobsson;2;Han är galen;1006
+199601020011;Hacke;Hackspett;2;Han har hackat för mycket;1006
+199302281429;Magnus;Svensson;2;Han har tappat minnet;1006;2005

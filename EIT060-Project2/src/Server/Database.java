@@ -155,7 +155,6 @@ public class Database {
 				au.println("DataBase" + fileToRemove + " was deleted");
 			}
 		}
-		
 	}
 	
 	private File getLatestDatabase(){
