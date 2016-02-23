@@ -1,39 +1,13 @@
-#!/bin/bash
-mkdir Users\\$ID
+mkdir Users\\1002
 
-echo keytool -import -file CA\\certificate.cer -alias Users\\$ID\\$ID_truststore -keystore Users\\$ID\\$ID_truststore
+keytool -import -file CA\\certificate.cer -alias Users\\1002\\1002_truststore -keystore Users\\1002\\1002_truststore
 
-echo password
-echo password
-echo ja
+keytool -keystore Users\\1002\\1002_keystore -genkey -alias Users\\1002\\1002_keystore
 
-echo keytool -keystore Users\\$ID\\$ID_keystore -genkey -alias Users\\$ID\\$ID_keystore
+keytool -keystore Users\\1002\\1002_keystore -certreq -alias Users\\1002\\1002_keystore -keyalg rsa -file Users\\1002\\1002.csr
 
-echo password
-echo password
-echo Firstname Surname
-echo $ID
-echo division
-echo Lund
-echo Sverige
-echo SE
-echo ja
-echo password
-echo password
+openssl x509 -req -CA CA\\cacert.pem -CAkey C:\\Users\\Christoffer\\git\\EIT060---Project2\\EIT060-Project2\\certificates\\CA\\private\\cakey.pem -in Users\\1002\\1002.csr -out Users\\1002\\1002.cer -days 365 -CAcreateserial
 
-echo keytool -keystore Users\\$ID\\$ID_keystore -certreq -alias Users\\$ID\\$ID_keystore -keyalg rsa -file Users\\$ID\\$ID.csr
+keytool -import -keystore Users\\1002\\1002_keystore -file CA\\cacert.pem -alias cert
 
-echo password
-
-echo openssl x509 -req -CA CA\\cacert.pem -CAkey C:\\Users\\Christoffer\\git\\EIT060---Project2\\EIT060-Project2\\certificates\\CA\\private\\cakey.pem -in Users\\$ID\\$ID.csr -out Users\\$ID\\$ID.cer -days 365 -CAcreateserial
-
-echo password
-
-echo keytool -import -keystore Users\\$ID\\$ID_keystore -file CA\\cacert.pem -alias cert
-
-echo password
-echo ja
-
-echo keytool -import -keystore Users\\$ID\\$ID_keystore -file Users\\$ID\\$ID.cer -alias Users\\$ID\\$ID_keystore
-
-echo password
+keytool -import -keystore Users\\1002\\1002_keystore -file Users\\1002\\1002.cer -alias Users\\1002\\1002_keystore
