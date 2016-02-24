@@ -193,7 +193,7 @@ public class Database {
 		BufferedReader scan = null;
 		try {
 			scan = new BufferedReader(new InputStreamReader(
-					new FileInputStream(file)));
+					new FileInputStream(file),"UTF8"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

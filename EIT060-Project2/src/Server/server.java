@@ -81,8 +81,7 @@ public class server implements Runnable {
 			String serial = cert.getSerialNumber().toString();
 
 			out = new PrintWriter(socket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(
-					socket.getInputStream()));
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream(),"ISO-8859-15"));
 
 			
 			if(connectedClients.contains(serial)){
@@ -107,6 +106,7 @@ public class server implements Runnable {
 			out.flush();
 			String clientMsg = null;
 			while ((clientMsg = in.readLine()) != null) {
+				System.out.println(clientMsg);
 				String[] certifacateInfos = subject.split(",");
 				String clientID = clientID = certifacateInfos[1].substring(4,
 						certifacateInfos[1].length());
@@ -161,12 +161,23 @@ public class server implements Runnable {
 					String comment = in.readLine();
 					au.println(user, comment);
 					out.flush();
+					int doctorID = 0;
+					
+					if((user instanceof Government)){
+						out.println("Add DoctorID");
+						out.println("listen");
+						doctorID = new Integer(in.readLine());
+						au.println(user,""+doctorID);
+						out.flush();
+					} else {
+						doctorID = new Integer(user.getID());
+					}
 
 					Record record = new Record(socialSecurityNumber, firstName,
 							surName, divisionID, comment);
 					try {
 						db.putRecord(user, record, divisionID,
-								new Integer(user.getID()), nurseIDs,
+								doctorID, nurseIDs,
 								socialSecurityNumber);
 						out.println("Record for " + socialSecurityNumber
 								+ " added");
