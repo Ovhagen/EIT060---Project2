@@ -16,7 +16,7 @@ public class Auditer {
 	
 	private PrintWriter writer;
 	private String location;
-	private String todaysDate;
+	private String todaysDateWithTime;
 	private Calendar  cal;
 	private SimpleDateFormat compactsdf, longsdf;
 	
@@ -32,9 +32,12 @@ public class Auditer {
 		cal = Calendar.getInstance();
 		compactsdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		longsdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		todaysDate = compactsdf.format(cal.getTime());
+		todaysDateWithTime = compactsdf.format(cal.getTime());
+		String todaysDateNoTime = (new SimpleDateFormat("yyyyMMdd")).format(cal.getTime());
+		new File(location + "/AuditLogs/" + (todaysDateNoTime)).mkdirs();
+		File file = new File(location + "/AuditLogs/" + todaysDateNoTime + "/Auditlog" + todaysDateWithTime);
 		try {
-			writer = new PrintWriter(new FileWriter(location + "/AuditLogs/Auditlog" + todaysDate, true));
+			writer = new PrintWriter(new FileWriter(file, true));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -44,7 +47,7 @@ public class Auditer {
 	
 	synchronized private void print(String s){
 		try {
-			writer = new PrintWriter(new FileWriter(location + "/AuditLogs/Auditlog" + todaysDate, true));
+			writer = new PrintWriter(new FileWriter(location + "/AuditLogs/Auditlog" + todaysDateWithTime, true));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
