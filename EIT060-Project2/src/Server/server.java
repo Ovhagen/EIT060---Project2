@@ -11,12 +11,12 @@ import javax.net.ssl.*;
 import javax.security.cert.X509Certificate;
 
 import Server.Database.AuthorizationException;
-import Client.Doctor;
-import Client.Employee;
-import Client.Government;
-import Client.Nurse;
-import Client.Patient;
-import Client.User;
+import User.Doctor;
+import User.Employee;
+import User.Government;
+import User.Nurse;
+import User.Patient;
+import User.User;
 
 public class server implements Runnable {
 	private ServerSocket serverSocket = null;

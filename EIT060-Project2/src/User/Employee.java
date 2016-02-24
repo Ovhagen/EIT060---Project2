@@ -1,4 +1,4 @@
-package Client;
+package User;
 
 public abstract class Employee extends User{
 	protected int division;

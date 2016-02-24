@@ -1,4 +1,4 @@
-package Client;
+package User;
 
 public class Government extends User {
 	

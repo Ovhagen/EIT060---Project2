@@ -1,4 +1,4 @@
-package Client;
+package User;
 
 public class Nurse extends Employee{
 	

@@ -28,12 +28,13 @@ import java.net.URL;
 
 
 
-import Client.Doctor;
-import Client.Employee;
-import Client.Government;
-import Client.Nurse;
-import Client.User;
-import Client.Patient;
+
+import User.Doctor;
+import User.Employee;
+import User.Government;
+import User.Nurse;
+import User.Patient;
+import User.User;
 
 public class Database {
 

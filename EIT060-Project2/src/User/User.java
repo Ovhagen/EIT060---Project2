@@ -1,4 +1,4 @@
-package Client;
+package User;
 
 public abstract class User {
 	protected String personalID, name;
