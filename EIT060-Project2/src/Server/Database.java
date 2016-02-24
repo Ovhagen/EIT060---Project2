@@ -26,6 +26,8 @@ import java.net.URL;
 
 
 
+
+
 import Client.Doctor;
 import Client.Employee;
 import Client.Government;
@@ -42,18 +44,22 @@ public class Database {
 	private String location;
 	private Auditer au;
 
-	public Database(Auditer au) {
+	public Database(Auditer au){
 		this.au = au;
 		records = new HashMap<String, RecordEntry>();
 		users = new ArrayList<>();
-		
+	}
+	
+	public void init() throws IOException {
 		URL tempLocation = server.class.getProtectionDomain().getCodeSource().getLocation();
 		location = "" + tempLocation;
 		location = location.substring(5, location.length());		
-		
+
 		file = getLatestDatabase();
 		if(file == null){
 			file = new File(location + "DataBase/DataBase-infoFile.txt");
+			saveDataBase();
+			throw new IOException("There are no databases in the system. Created empty database");
 		} else {
 			au.println("Loading database " + file.getName());
 			loadDataBase();
@@ -287,6 +293,9 @@ public class Database {
 				if (!re.getSocialSecurityNumber().equals(user.getID())){
 					throw new AuthorizationException("You do not have permission to see that record");
 				}
+			}
+			if(re == null){
+				throw new NullPointerException();
 			}
 			return re;
 		} catch(NullPointerException e) {

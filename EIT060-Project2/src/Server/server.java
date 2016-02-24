@@ -33,8 +33,12 @@ public class server implements Runnable {
 		newListener();
 		clients = new HashMap<>();
 		au = new Auditer();
-		;
 		db = new Database(au);
+		try{
+			db.init();
+		} catch(IOException e){
+			au.println(e.getMessage());
+		}
 		connectedClients = new ArrayList<>();
 	}
 
