@@ -47,7 +47,7 @@ public class Auditer {
 	
 	synchronized private void print(String s){
 		try {
-			writer = new PrintWriter(new FileWriter(location + "/AuditLogs/" + todaysDateNoTime + "/" + todaysDateWithTime, true));
+			writer = new PrintWriter(new FileWriter(location + "/AuditLogs/" + todaysDateNoTime + "/Auditlog" + todaysDateWithTime, true));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
