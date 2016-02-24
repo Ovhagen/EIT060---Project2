@@ -1,0 +1,23 @@
+
+24/02/2016 18:47:45 - Loading database DataBase20160224175513
+24/02/2016 18:47:45 - New client connected
+24/02/2016 18:47:45 - client name (cert subject DN field): CN=Stefan Lofven, OU=0001, O=0, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+24/02/2016 18:47:45 - Serial number: 12402813572523847036
+24/02/2016 18:47:45 - 1 concurrent connection(s)
+
+24/02/2016 18:47:45 - "-pa" from 0001
+24/02/2016 18:47:45 - "-p Christoffer MacFie 1 2001 2002 199403034375" from 0001
+24/02/2016 18:47:45 - "Han har svimmat" from 0001
+24/02/2016 18:47:45 - "1001" from 0001
+24/02/2016 18:47:45 - Database20160224184828 was created.
+24/02/2016 18:47:45 - DataBase20160224171632 was deleted
+24/02/2016 18:47:45 - Database20160224184828 was created.
+24/02/2016 18:47:45 - DataBase20160224171643 was deleted
+24/02/2016 18:47:45 - Record for 199403034375 added
+24/02/2016 18:47:45 - "-pa" from 0001
+24/02/2016 18:47:45 - "-pacl 199403034375" from 0001
+24/02/2016 18:47:45 - "-an 199403034375 2001 2003" from 0001
+24/02/2016 18:47:45 - Database20160224184845 was created.
+24/02/2016 18:47:45 - DataBase20160224171659 was deleted
+24/02/2016 18:47:45 - "-pacl 199403034375" from 0001

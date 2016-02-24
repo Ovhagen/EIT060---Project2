@@ -30,11 +30,21 @@ import Server.server;
  * The application can be modified to connect to a server outside
  * the firewall by following SSLSocketClientWithTunneling.java.
  */
-public class client {
+public class Client {
 
+	private String clientID;
+	private String serial;
 
 	public static void main(String[] args) throws Exception {
-		new client().init();
+		new Client().init();
+	}
+	
+	public String getClientID(){
+		return clientID;
+	}
+	
+	public String getSerial(){
+		return serial;
 	}
 	
 	public void init() throws IOException{
@@ -65,6 +75,7 @@ public class client {
 					terminate = true;
 					break;
 				}
+				clientID = userPath;
 				/*Users keystore password is entered*/
 				char[] pass = console.readPassword("Password: ");
 				
@@ -126,7 +137,7 @@ public class client {
 				String subject = cert.getSubjectDN().getName();
 	
 				String issuer = cert.getIssuerDN().getName();
-				String serial = cert.getSerialNumber().toString();
+				serial = cert.getSerialNumber().toString();
 				
 				
 	

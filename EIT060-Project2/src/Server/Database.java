@@ -67,7 +67,7 @@ public class Database {
 	}
 
 
-	synchronized private void loadDataBase() {
+	synchronized private void loadDataBase() throws IOException {
 		Scanner scan = null;
 		try {
 			scan = new Scanner(file);
@@ -75,70 +75,74 @@ public class Database {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		String line = scan.nextLine();
-		while (!line.equals("-Users")) {
+		String line = "";
+		while (scan.hasNextLine() && !line.equals("-Users")) {
 			line = scan.nextLine();
 		}
-		line = scan.nextLine();
-		if (line != null) {
-			while (!line.equals("-Records")) {
-				String[] infos = line.split(";");
-				String userType = infos[0];
-				String userID = infos[1];
-				String name = infos[2];
-				switch (userType) {
-				case "G":
-					Government government = new Government(userID, name);
-					users.add(government);
-					break;
-				case "D":
-					Doctor doctor = new Doctor(userID, name, new Integer(
-							infos[3]));
-					users.add(doctor);
-					break;
-				case "N":
-					Nurse nurse = new Nurse(userID, name, new Integer(infos[3]));
-					users.add(nurse);
-					break;
-				case "P":
-					Patient patient = new Patient(userID, name);
-					users.add(patient);
-					break;
-				}
-				line = scan.nextLine();
-			}
-			if(scan.hasNextLine()){
-				line = scan.nextLine();
-			} else {
-				line = null;
-			}
-			while (line != null) {
-				String[] infos = line.split(";");
-				String socialSecurityNumber = infos[0];
-				int divisionID = new Integer(infos[3]);
-				Record record = new Record(socialSecurityNumber, infos[1],
-						infos[2], divisionID, infos[4]);
-				int i = 5;
-				int doctorID = -1;
-				ArrayList<Integer> nurseIDs = new ArrayList<>();
-				while (i < infos.length) {
-					int employeeNumber = new Integer(infos[i]);
-					if (employeeNumber >= 1000 && employeeNumber < 2000) {
-						doctorID = employeeNumber;
-					} else if (employeeNumber >= 2000){
-						nurseIDs.add(employeeNumber);
+		if(scan.hasNextLine()){
+			line = scan.nextLine();
+			if (line != null) {
+				while (!line.equals("-Records")) {
+					String[] infos = line.split(";");
+					String userType = infos[0];
+					String userID = infos[1];
+					String name = infos[2];
+					switch (userType) {
+					case "G":
+						Government government = new Government(userID, name);
+						users.add(government);
+						break;
+					case "D":
+						Doctor doctor = new Doctor(userID, name, new Integer(
+								infos[3]));
+						users.add(doctor);
+						break;
+					case "N":
+						Nurse nurse = new Nurse(userID, name, new Integer(infos[3]));
+						users.add(nurse);
+						break;
+					case "P":
+						Patient patient = new Patient(userID, name);
+						users.add(patient);
+						break;
 					}
-					i++;
+					line = scan.nextLine();
 				}
-				RecordEntry recordEntry = new RecordEntry(record, divisionID,
-						doctorID, nurseIDs, socialSecurityNumber);
-				records.put(socialSecurityNumber, recordEntry);
-				if (scan.hasNextLine()) {
+				if(scan.hasNextLine()){
 					line = scan.nextLine();
 				} else {
 					line = null;
 				}
+				while (line != null) {
+					String[] infos = line.split(";");
+					String socialSecurityNumber = infos[0];
+					int divisionID = new Integer(infos[3]);
+					Record record = new Record(socialSecurityNumber, infos[1],
+							infos[2], divisionID, infos[4]);
+					int i = 5;
+					int doctorID = -1;
+					ArrayList<Integer> nurseIDs = new ArrayList<>();
+					while (i < infos.length) {
+						int employeeNumber = new Integer(infos[i]);
+						if (employeeNumber >= 1000 && employeeNumber < 2000) {
+							doctorID = employeeNumber;
+						} else if (employeeNumber >= 2000){
+							nurseIDs.add(employeeNumber);
+						}
+						i++;
+					}
+					RecordEntry recordEntry = new RecordEntry(record, divisionID,
+							doctorID, nurseIDs, socialSecurityNumber);
+					records.put(socialSecurityNumber, recordEntry);
+					if (scan.hasNextLine()) {
+						line = scan.nextLine();
+					} else {
+						line = null;
+					}
+				}
 			}
+		} else {
+			throw new IOException("Could not load database properly");
 		}
 
 	}
@@ -322,6 +326,8 @@ public class Database {
 		Patient patient = new Patient(socialSecurityNumber, record.getFirstName() + " " + record.getSurName());
 		if(!users.contains(patient)){
 			addUser(patient);
+		} else {
+			throw new AuthorizationException("A patient with that socialSecurityNumber already exist.");
 		}
 		
 		RecordEntry recordEntry = new RecordEntry(record, divisionID, doctorID,
@@ -337,7 +343,98 @@ public class Database {
 		} else {
 			throw new AuthorizationException("You do not have the athority to create a record");
 		}
+	}
+	
+	public void editACL(String edit, User user, String socialSecurityNumber, int doctorID, ArrayList<Integer> nurseIDs) throws AuthorizationException{
+		RecordEntry re = records.get(socialSecurityNumber);
+		Record record = re.getRecord();
+		int oldDoctorID = re.getDoctorID();
+		ArrayList<Integer> oldNurseIDs = re.getNurseIDs();
+		if(edit.equals("rm")){
+			Iterator<Integer> it = oldNurseIDs.iterator();
+			for(Integer nurseID : nurseIDs){
+				while(it.hasNext()){
+					if(it.next().equals(nurseID)){
+						it.remove();
+						break;
+					}
+				}
+			}
+			for(Integer nurseID : oldNurseIDs){
+				if(nurseIDs.contains(nurseID)){
+					oldNurseIDs.remove(new Integer(nurseID));
+				}
+			}
+			nurseIDs = oldNurseIDs;
+		} else if(edit.equals("add")){
+			for(int nurseID : nurseIDs){
+				oldNurseIDs.add(nurseID);
+			}
+			nurseIDs = oldNurseIDs;
+		} else if (edit.length() == 0){
+			if(!(user instanceof Government)){
+				throw new AuthorizationException("You are not allowed to edit doctor IDs");
+			}
+		}
+		if(user instanceof Doctor){
+			if(((Doctor) user).getDivisionID() == record.getDivisionID()){
+				records.remove(socialSecurityNumber);
+				RecordEntry newRe = new RecordEntry(record, record.getDivisionID(), oldDoctorID, nurseIDs, socialSecurityNumber);
+				records.put(socialSecurityNumber, newRe);
+			}else {
+				throw new AuthorizationException("You do not have permission to edit that ACL");
+			}
+			try {
+				saveDataBase();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if(user instanceof Government){
+			records.remove(socialSecurityNumber);
+			if(doctorID < 1000){
+				doctorID = oldDoctorID;
+			}
+			if(nurseIDs == null){
+				nurseIDs = oldNurseIDs;
+			}
+			RecordEntry newRe = new RecordEntry(record, record.getDivisionID(), doctorID, nurseIDs, socialSecurityNumber);
+			records.put(socialSecurityNumber, newRe);
+			try {
+				saveDataBase();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			throw new AuthorizationException("You do not have permission to edit ACLs");
+		}
+	}
+	
+	public ArrayList<Integer> getACL(User user, String socialSecurityNumber) throws AuthorizationException{
+		ArrayList<Integer> acls = new ArrayList<Integer>();
+		RecordEntry re = records.get(socialSecurityNumber);
+		if(re == null){
+			throw new NullPointerException("No record for that social security number exists");
+		}
 		
+		ArrayList<Integer> nurseIDs = re.getNurseIDs();
+		for(Integer nurseID : nurseIDs){
+			acls.add(nurseID);
+		}
+		acls.add(re.getDoctorID());
+		
+		if(user instanceof Doctor){
+			if(((Doctor) user).getDivisionID() == re.getRecord().getDivisionID()){
+				return acls;
+			}else {
+				throw new AuthorizationException("You do not have permission to see that ACL");
+			}
+		} else if(user instanceof Government){
+			return acls;
+		} else {
+			throw new AuthorizationException("You do not have permission to see ACLs");
+		}
 	}
 	
 	public ArrayList<Record> getAllAvailabe(User user) throws AuthorizationException{
@@ -384,6 +481,8 @@ public class Database {
 				throw new NullPointerException();
 			} else if(user instanceof Government || user instanceof Doctor){
 				records.remove(socialSecurityNumber);
+				Patient p = new Patient(socialSecurityNumber, "");
+				users.remove(p);
 				au.println("Removed record " + socialSecurityNumber);
 				try {
 					saveDataBase();
@@ -420,9 +519,15 @@ public class Database {
 			}
 			if(newRecord.getFirstName() != null){
 				firstName = newRecord.getFirstName();
+				Patient p = new Patient(socialSecurityNumber, firstName+surName);
+				users.remove(p);
+				users.add(p);
 			}
 			if(newRecord.getSurName() != null){
 				surName = newRecord.getSurName();
+				Patient p = new Patient(socialSecurityNumber, firstName+surName);
+				users.remove(p);
+				users.add(p);
 			}
 			Record editedRecord = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
 			RecordEntry editedRecordEntry = new RecordEntry(editedRecord, divisionID, doctorID, nurseIDs, socialSecurityNumber);
