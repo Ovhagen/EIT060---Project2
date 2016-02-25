@@ -230,11 +230,15 @@ public class server implements Runnable {
 
 		String socialSecurityNumber = infos[1];
 		if (socialSecurityNumber.length() == 12) {
-			int doctorID = new Integer(infos[2]);
-			try{
-				db.editDoctorACL(user, socialSecurityNumber, doctorID);
-			} catch (AuthorizationException e){
-				throw e;
+			if(infos.length == 3){
+				int doctorID = new Integer(infos[2]);
+				try{
+					db.editDoctorACL(user, socialSecurityNumber, doctorID);
+				} catch (AuthorizationException e){
+					throw e;
+				}
+			} else {
+				throw new WrongFormatException("Wrong amount of arguments.");
 			}
 		} else {
 			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
@@ -287,8 +291,11 @@ public class server implements Runnable {
 	}
 
 	private void help(User user) {
-		int userID = new Integer(user.getID());
-		out.println("Example Get: -ge SocialSecurityNumber");
+		out.println("Example Get: -g SocialSecurityNumber");
+		int userID = 4000;
+		if(user.getID().length() < 5){
+			userID = new Integer(user.getID());
+		}
 		if (userID < 3000) {
 			out.println("Example Print All: -pa");
 			out.println("Example Edit: -e SocialSecurityNumber");

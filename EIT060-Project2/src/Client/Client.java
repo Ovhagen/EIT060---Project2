@@ -111,39 +111,19 @@ public class Client {
 					factory = ctx.getSocketFactory();
 					login = false;
 				} catch (Exception e) {
-					System.out.println("Incorrect password");
+					System.out.println("Incorrect username or password");
 				}
 			} catch (FileNotFoundException e) {
-				System.out.println("Username does not exist. Please try again.");
+				System.out.println("Incorrect username or password");
 			}
 		}
 		if(!terminate){
-			try { /* set up a key manager for client authentication */
-				
-				
+			try { /* set up a key manager for client authentication */	
 				SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
-				System.out.println("\nsocket before handshake:\n" + socket + "\n");
-	
-				/*
-				 * send http request
-				 * 
-				 * See SSLSocketClient.java for more information about why there is
-				 * a forced handshake here when using PrintWriters.
-				 */
 				socket.startHandshake();
-	
 				SSLSession session = socket.getSession();
 				X509Certificate cert = (X509Certificate) session.getPeerCertificateChain()[0];
-				String subject = cert.getSubjectDN().getName();
-	
-				String issuer = cert.getIssuerDN().getName();
 				serial = cert.getSerialNumber().toString();
-				
-				
-	
-	
-	
-	
 				BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
 				PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -152,15 +132,10 @@ public class Client {
 				if(allowed.equalsIgnoreCase("notAllowed")){
 					throw new LoginException("User already logged in");
 				} 
-				
-				System.out.println("certificate name (subject DN field) on certificate received from server:\n" + subject
-						+ "\n" + "issuer name (issuer DN field) on certificate received from server:\n" + issuer);
-				System.out.println("Serial number: " + serial);
-				System.out.println("socket after handshake:\n" + socket + "\n");
-				System.out.println("secure connection established\n\n");
+				System.out.println("Secure connection established\n\n");
 				
 				System.out.println("Succesful login! Type a command in the prompt and press enter.");
-				System.out.println("Get -g, Put -p, Edit -e, Help -h, -r Remove, -pa Print All, Logout logout, Quit quit");
+				System.out.println("Help -h, Logout logout, Quit quit");
 				
 				for (;;) {
 					System.out.print(">");
