@@ -134,10 +134,19 @@ public class server implements Runnable {
 		au.println(user, clientMsg);
 		String[] infos = clientMsg.split(" ");
 		String command = infos[0];
-		if (command.equals("-h")) {
-			help(user);
-		} else if (infos.length > 1) {
-			try {
+		try {
+			if (infos.length <= 1) {
+				switch(command){
+				case "-h":
+					help(user);
+					break;
+				case "-pa":
+					printAll(user);
+					break;
+				default:
+					throw new WrongFormatException("Command not recognized or no arguments");
+				}
+			} else if (infos.length > 1) {
 				switch (command) {
 				case "-rm":
 					remove(user, infos);
@@ -164,26 +173,18 @@ public class server implements Runnable {
 					Record r = get(user, infos);
 					out.println(r.toString());
 					break;
-				case "-pa":
-					printAll(user, infos);
-					break;
 				default:
 					throw new WrongFormatException("Command not recognized or no arguments");
 				}
-			} catch (Exception e) {
-				out.println("Error " + e.getMessage());
-				au.println("Error " + e.getMessage());
 			}
-		} else {
-			out.println("Too few arguments");
-			au.println("Too few arguments");
+		} catch (Exception e) {
+			out.println("Error " + e.getMessage());
+			au.println("Error " + e.getMessage());
 		}
-
-	}
+	} 
 
 	private void addNurse(User user, String[] infos) throws WrongFormatException, AuthorizationException {
-		if (infos.length > 0) {
-			String socialSecurityNumber = infos[1];
+		if (infos.length > 0) {			String socialSecurityNumber = infos[1];
 			if (socialSecurityNumber.length() == 12) {
 				if (infos.length >= 3) {
 					ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
@@ -201,8 +202,6 @@ public class server implements Runnable {
 			} else {
 				throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
 			}
-		} else {
-			throw new WrongFormatException("Too few arguments");
 		}
 	}
 
@@ -228,24 +227,22 @@ public class server implements Runnable {
 	}
 
 	private void editDoctorID(User user, String[] infos) throws WrongFormatException, AuthorizationException{
-		if(infos.length > 1){
-			String socialSecurityNumber = infos[1];
-			if (socialSecurityNumber.length() == 12) {
-				int doctorID = new Integer(infos[2]);
-				try{
-					db.editDoctorACL(user, socialSecurityNumber, doctorID);
-				} catch (AuthorizationException e){
-					throw e;
-				}
-			} else {
-				throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
+
+		String socialSecurityNumber = infos[1];
+		if (socialSecurityNumber.length() == 12) {
+			int doctorID = new Integer(infos[2]);
+			try{
+				db.editDoctorACL(user, socialSecurityNumber, doctorID);
+			} catch (AuthorizationException e){
+				throw e;
 			}
 		} else {
-			throw new WrongFormatException("Too few arguments");
+			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
 		}
 	}
 
 	private void remove(User user, String[] infos) throws WrongFormatException, AuthorizationException {
+
 		String socialSecurityNumber = infos[1];
 		if (socialSecurityNumber.length() == 12) {
 			try {
@@ -308,7 +305,7 @@ public class server implements Runnable {
 		}
 	}
 
-	private void printAll(User user, String[] infos) throws AuthorizationException {
+	private void printAll(User user) throws AuthorizationException {
 		try {
 			StringBuilder stars = new StringBuilder();
 			StringBuilder divider = new StringBuilder();
