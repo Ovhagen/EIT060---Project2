@@ -37,7 +37,7 @@ public class Record {
 	
 	
 	public String toString(){
-		return ("ID: " + ID + "\n Förnamn: " + firstName + "\n Efternamn: " + surName + "\nDivision: " + divisionID +  "\n Comment: " + comment);
+		return ("ID: " + ID + "\n First Name: " + firstName + "\n Surname: " + surName + "\nDivision: " + divisionID +  "\n Comment: " + comment);
 	}
 	
 	
