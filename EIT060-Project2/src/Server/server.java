@@ -35,9 +35,9 @@ public class server implements Runnable {
 		clients = new HashMap<>();
 		au = new Auditer();
 		db = new Database(au);
-		try{
+		try {
 			db.init();
-		} catch(IOException e){
+		} catch (IOException e) {
 			au.println(e.getMessage());
 		}
 		connectedClients = new ArrayList<>();
@@ -45,12 +45,9 @@ public class server implements Runnable {
 
 	private void addUser(String subject) {
 		String[] certifacateInfos = subject.split(",");
-		String userID = certifacateInfos[1].substring(4,
-				certifacateInfos[1].length());
-		String name = certifacateInfos[0].substring(3,
-				certifacateInfos[0].length());
-		int division = new Integer(certifacateInfos[2].substring(3,
-				certifacateInfos[2].length()));
+		String userID = certifacateInfos[1].substring(4, certifacateInfos[1].length());
+		String name = certifacateInfos[0].substring(3, certifacateInfos[0].length());
+		int division = new Integer(certifacateInfos[2].substring(3, certifacateInfos[2].length()));
 
 		if (userID.length() < 5) { // Not a Patient
 			int userType = new Integer(userID);
@@ -74,20 +71,18 @@ public class server implements Runnable {
 			SSLSocket socket = (SSLSocket) serverSocket.accept();
 			newListener();
 			SSLSession session = socket.getSession();
-			X509Certificate cert = (X509Certificate) session
-					.getPeerCertificateChain()[0];
+			X509Certificate cert = (X509Certificate) session.getPeerCertificateChain()[0];
 			String subject = cert.getSubjectDN().getName();
 
 			String issuer = cert.getIssuerDN().getName();
 			String serial = cert.getSerialNumber().toString();
 
 			out = new PrintWriter(socket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream(),"ISO-8859-15"));
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "ISO-8859-15"));
 
-			
-			if(connectedClients.contains(serial)){
+			if (connectedClients.contains(serial)) {
 				out.println("notAllowed");
-				throw new Exception("Client with serial " +serial+" already connected");
+				throw new Exception("Client with serial " + serial + " already connected");
 			} else {
 				out.println("allowed");
 			}
@@ -95,27 +90,26 @@ public class server implements Runnable {
 
 			numConnectedClients++;
 			au.println("New client connected");
-			au.println("client name (cert subject DN field): " + subject + "\n"
-					+ "issuer name(cert issuer DN field): " + issuer);
+			au.println("client name (cert subject DN field): " + subject + "\n" + "issuer name(cert issuer DN field): "
+					+ issuer);
 
 			addUser(subject);
 
 			au.println("Serial number: " + serial);
 			au.println(numConnectedClients + " concurrent connection(s)\n");
-			
+
 			out.flush();
 			String[] certifacateInfos = subject.split(",");
-			String clientID = certifacateInfos[1].substring(4,
-					certifacateInfos[1].length());
+			String clientID = certifacateInfos[1].substring(4, certifacateInfos[1].length());
 			String clientMsg = null;
-			
+
 			while ((clientMsg = in.readLine()) != null) {
 				System.out.println(clientMsg);
 				handleInput(clientMsg, clientID);
 				out.println("listen");
 				out.flush();
 			}
-			
+
 			connectedClients.remove(serial);
 			in.close();
 			out.close();
@@ -125,123 +119,138 @@ public class server implements Runnable {
 			au.println(numConnectedClients + " concurrent connection(s)\n");
 		} catch (Exception e) {
 			Object o = e.getClass();
-			if(o instanceof Client){
-				Client c = ((Client)o);
+			if (o instanceof Client) {
+				Client c = ((Client) o);
 				au.println("Client " + c.getClientID() + " died: " + e.getMessage());
 				connectedClients.remove(c.getSerial());
-			}else {
+			} else {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private void handleInput(String clientMsg, String clientID)
-			throws IOException {
+	private void handleInput(String clientMsg, String clientID) throws IOException {
 		User user = clients.get(clientID);
 		au.println(user, clientMsg);
 		String[] infos = clientMsg.split(" ");
 		String command = infos[0];
-		try {
-			switch(command){
-			case "-h":
-				help(user);
-				break;
-			case "-rm":	
-				remove(user, infos);
-				break;
-			case "-an":
-				addNurse(user,infos);
-				break;
-			case "-rn":
-				removeNurse(user,infos);
-				break;
-			case "-ed":
-				editDoctorID(user,infos);
-				break;
-			case "-pacl":
-				printACL(user,infos);
-				break;
-			case "-p":
-				put(user,infos);
-				break;
-			case "-e":
-				edit(user, infos);
-				break;
-			case "-g": 
-				Record r = get(user, infos);
-				out.println(r.toString());
-				break;
-			case "-pa":
-				printAll(user,infos);
-				break;
-			default:
-				throw new WrongFormatException("Command not recognized or no arguments");
+		if (command.equals("-h")) {
+			help(user);
+		} else if (infos.length > 1) {
+			try {
+				switch (command) {
+				case "-rm":
+					remove(user, infos);
+					break;
+				case "-an":
+					addNurse(user, infos);
+					break;
+				case "-rn":
+					removeNurse(user, infos);
+					break;
+				case "-ed":
+					editDoctorID(user, infos);
+					break;
+				case "-pacl":
+					printACL(user, infos);
+					break;
+				case "-p":
+					put(user, infos);
+					break;
+				case "-e":
+					edit(user, infos);
+					break;
+				case "-g":
+					Record r = get(user, infos);
+					out.println(r.toString());
+					break;
+				case "-pa":
+					printAll(user, infos);
+					break;
+				default:
+					throw new WrongFormatException("Command not recognized or no arguments");
+				}
+			} catch (Exception e) {
+				out.println("Error " + e.getMessage());
+				au.println("Error " + e.getMessage());
 			}
-		} catch (Exception e){
-			out.println(e.getMessage());
-			au.println(e.getMessage());
+		} else {
+			out.println("Too few arguments");
+			au.println("Too few arguments");
+		}
+
+	}
+
+	private void addNurse(User user, String[] infos) throws WrongFormatException, AuthorizationException {
+		if (infos.length > 0) {
+			String socialSecurityNumber = infos[1];
+			if (socialSecurityNumber.length() == 12) {
+				if (infos.length >= 3) {
+					ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
+					for (int i = 2; i < infos.length; i++) {
+						nurseIDs.add(new Integer(infos[i]));
+					}
+					try {
+						db.addNurseACL(user, socialSecurityNumber, nurseIDs);
+					} catch (AuthorizationException e) {
+						throw e;
+					}
+				} else {
+					throw new WrongFormatException("No argument found");
+				}
+			} else {
+				throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
+			}
+		} else {
+			throw new WrongFormatException("Too few arguments");
 		}
 	}
-	
-	private void addNurse(User user, String[] infos) throws WrongFormatException, AuthorizationException{
+
+	private void removeNurse(User user, String[] infos) throws WrongFormatException, AuthorizationException {
 		String socialSecurityNumber = infos[1];
 		if (socialSecurityNumber.length() == 12) {
-			ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
-			for(int i =2; i < infos.length; i++){
-				nurseIDs.add(new Integer(infos[i]));
-			}
-			try{
-				db.editACL("add", user, socialSecurityNumber, 0, nurseIDs);
-			} catch (AuthorizationException e){
-				throw e;
+			if (infos.length >= 3) {
+				ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
+				for (int i = 2; i < infos.length; i++) {
+					nurseIDs.add(new Integer(infos[i]));
+				}
+				try {
+					db.removeNurseACL(user, socialSecurityNumber, nurseIDs);
+				} catch (AuthorizationException e) {
+					throw e;
+				}
+			} else {
+				throw new WrongFormatException("No argument found");
 			}
 		} else {
 			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
 		}
 	}
-	
-	private void removeNurse(User user, String[] infos) throws WrongFormatException, AuthorizationException{
-		String socialSecurityNumber = infos[1];
-		if (socialSecurityNumber.length() == 12) {
-			if(infos.length == 3){
-				ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
-				for(int i =2; i < infos.length; i++){
-					nurseIDs.add(new Integer(infos[i]));
-				}
+
+	private void editDoctorID(User user, String[] infos) throws WrongFormatException, AuthorizationException{
+		if(infos.length > 1){
+			String socialSecurityNumber = infos[1];
+			if (socialSecurityNumber.length() == 12) {
+				int doctorID = new Integer(infos[2]);
 				try{
-					db.editACL("rm", user, socialSecurityNumber, 0, nurseIDs);
+					db.editDoctorACL(user, socialSecurityNumber, doctorID);
 				} catch (AuthorizationException e){
 					throw e;
 				}
 			} else {
-				out.println("Wrong format, can only remove one nurse at a time. Try again");
+				throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
 			}
 		} else {
-			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
+			throw new WrongFormatException("Too few arguments");
 		}
 	}
-	
-	private void editDoctorID(User user, String[] infos) throws WrongFormatException, AuthorizationException{
-		String socialSecurityNumber = infos[1];
-		if (socialSecurityNumber.length() == 12) {
-			int doctorID = new Integer(infos[2]);
-			try{
-				db.editACL("", user, socialSecurityNumber, doctorID, null);
-			} catch (AuthorizationException e){
-				throw e;
-			}
-		} else {
-			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
-		}
-	}
-	
-	private void remove(User user, String[] infos) throws WrongFormatException, AuthorizationException{
+
+	private void remove(User user, String[] infos) throws WrongFormatException, AuthorizationException {
 		String socialSecurityNumber = infos[1];
 		if (socialSecurityNumber.length() == 12) {
 			try {
 				db.removeRecord(user, socialSecurityNumber);
-				System.out.println("Successfully removed "
-						+ socialSecurityNumber);
+				System.out.println("Successfully removed " + socialSecurityNumber);
 			} catch (NullPointerException | AuthorizationException e) {
 				throw e;
 			}
@@ -249,27 +258,27 @@ public class server implements Runnable {
 			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
 		}
 	}
-	
-	private void printACL(User user, String[] infos) throws WrongFormatException, AuthorizationException{
+
+	private void printACL(User user, String[] infos) throws WrongFormatException, AuthorizationException {
 		String socialSecurityNumber = infos[1];
 		if (socialSecurityNumber.length() == 12) {
 			try {
 				ArrayList<Integer> acls = db.getACL(user, socialSecurityNumber);
 				StringBuilder stars = new StringBuilder();
 				StringBuilder divider = new StringBuilder();
-				for(int j = 0; j < 24; j++){
+				for (int j = 0; j < 24; j++) {
 					stars.append("*");
 					divider.append("-");
 				}
 				out.println(stars);
 				out.println("* ACL for " + socialSecurityNumber + " *");
 				out.println("*" + divider.substring(2) + "*");
-				for(Integer i : acls){
+				for (Integer i : acls) {
 					String userType = "Doctor";
-					if(i >= 2000){
+					if (i >= 2000) {
 						userType = "Nurse";
 					}
-					out.println(String.format("%s %-12s %7s %s","*", userType, i,"*"));
+					out.println(String.format("%s %-12s %7s %s", "*", userType, i, "*"));
 				}
 				out.println(stars);
 			} catch (NullPointerException | AuthorizationException e) {
@@ -279,27 +288,27 @@ public class server implements Runnable {
 			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
 		}
 	}
-	
-	private void help(User user){
+
+	private void help(User user) {
 		int userID = new Integer(user.getID());
 		out.println("Example Get: -ge SocialSecurityNumber");
-		if(userID < 3000){
+		if (userID < 3000) {
 			out.println("Example Print All: -pa");
 			out.println("Example Edit: -e SocialSecurityNumber");
 		}
-		if(userID < 2000){
+		if (userID < 2000) {
 			out.println("Example Remove: -rm SocialSecurityNumber");
 			out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
-			out.println("Example: Add Nurses: -an SocialSecurityNumber NurseID, NurseID, NurseID");
-			out.println("Example: Remove Nurse: -rn SocialSecurityNumber NurseID");
+			out.println("Example: Add Nurses: -an SocialSecurityNumber NurseID1 NurseID2 NurseID3....");
+			out.println("Example: Remove Nurse: -rn SocialSecurityNumber NurseID1 NurseID2 NurseID3... ");
 			out.println("Example: Print ACL: -pacl SocialSecurityNumber");
 		}
-		if(userID < 1000){
+		if (userID < 1000) {
 			out.println("Example: Edit DoctorID: -ed SocialSecurityNumber DoctorID");
 		}
 	}
-	
-	private void printAll(User user, String[] infos) throws AuthorizationException{
+
+	private void printAll(User user, String[] infos) throws AuthorizationException {
 		try {
 			StringBuilder stars = new StringBuilder();
 			StringBuilder divider = new StringBuilder();
@@ -309,19 +318,20 @@ public class server implements Runnable {
 				divider.append("-");
 			}
 			out.print(stars + "\n");
-			out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-30s %24s %s", "*", "First Name", "Surname", "Division", "Social Security Number","Comment","*","\n"));
+			out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-30s %24s %s", "*", "First Name", "Surname",
+					"Division", "Social Security Number", "Comment", "*", "\n"));
 			out.print("*" + divider.substring(2) + "*\n");
 			for (Record r : records) {
-				out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-30s %24s %s","*", r.getFirstName(), r.getSurName(), r.getDivisionID(), r.getID(), r.getComment().trim(), "*", "\n"));
+				out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-30s %24s %s", "*", r.getFirstName(),
+						r.getSurName(), r.getDivisionID(), r.getID(), r.getComment().trim(), "*", "\n"));
 			}
 			out.println(stars);
 		} catch (AuthorizationException | NullPointerException e) {
 			throw e;
 		}
 	}
-	
 
-	private void put(User user, String[] infos) throws IOException, WrongFormatException{
+	private void put(User user, String[] infos) throws IOException, WrongFormatException {
 		if (infos.length > 4) {
 			String firstName = infos[1];
 			String surName = infos[2];
@@ -333,25 +343,13 @@ public class server implements Runnable {
 			}
 			String comment = takeInput(user, "Add comment to record: ");
 			int doctorID = 0;
-			
-			if((user instanceof Government)){
-				doctorID = new Integer(takeInput(user, "Add DoctorID"));
-			} else {
-				doctorID = new Integer(user.getID());
-			}
 
-			Record record = new Record(socialSecurityNumber, firstName,
-					surName, divisionID, comment);
+			Record record = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
 			try {
-				db.putRecord(user, record, divisionID,
-						doctorID, nurseIDs,
-						socialSecurityNumber);
-				out.println("Record for " + socialSecurityNumber
-						+ " added");
-				au.println("Record for " + socialSecurityNumber
-						+ " added");
-			} catch (NumberFormatException | NullPointerException
-					| AuthorizationException e) {
+				db.putRecord(user, record, divisionID, doctorID, nurseIDs, socialSecurityNumber);
+				out.println("Record for " + socialSecurityNumber + " added");
+				au.println("Record for " + socialSecurityNumber + " added");
+			} catch (NumberFormatException | NullPointerException | AuthorizationException e) {
 				out.println(e.getMessage());
 				au.errorprintln(user, e.getMessage());
 			}
@@ -359,8 +357,8 @@ public class server implements Runnable {
 			throw new WrongFormatException("Too few arguments");
 		}
 	}
-	
-	private String takeInput(User user, String s) throws IOException{
+
+	private String takeInput(User user, String s) throws IOException {
 		out.println(s);
 		out.println("listen");
 		String input = in.readLine();
@@ -368,8 +366,8 @@ public class server implements Runnable {
 		out.flush();
 		return input;
 	}
-	
-	private void edit(User user, String[] infos) throws IOException, WrongFormatException, AuthorizationException{
+
+	private void edit(User user, String[] infos) throws IOException, WrongFormatException, AuthorizationException {
 		Record record = get(user, infos);
 		String socialSecurityNumber = infos[1];
 		if (record != null) {
@@ -379,16 +377,16 @@ public class server implements Runnable {
 			int divisionID = -1;
 			String comment = null;
 
-			String edit = takeInput(user, "What do you want to change? \n FirstName -fn, Surname -sn, Comment -co, Divison -di \nSocialSecurityNumber -scc, Quit -q");
-			
+			String edit = takeInput(user,
+					"What do you want to change? \n FirstName -fn, Surname -sn, Comment -co, Divison -di \nSocialSecurityNumber -scc, Quit -q");
+
 			if (!edit.contains("-q")) {
 				String[] edits = edit.split(" ");
 				for (int i = 0; i < edits.length; i += 2) {
 					if (edits[i].contains("-co")) {
 						int index = i + 1;
 						comment = "";
-						while (index < edits.length
-								&& !edits[index].contains("-")) {
+						while (index < edits.length && !edits[index].contains("-")) {
 							comment += " " + edits[index];
 							index++;
 						}
@@ -406,30 +404,24 @@ public class server implements Runnable {
 							} else if (choice.equals("-scc")) {
 								socialSecurityNumber = change;
 							} else {
-								out.println("Command " + choice
-										+ " not recognized");
+								out.println("Command " + choice + " not recognized");
 							}
 						}
 					}
 				}
-				record = new Record(socialSecurityNumber,
-						firstName, surName, divisionID, comment);
+				record = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
 				try {
-					db.editRecord(user, record,
-							socialSecurityNumber);
-					out.println("Record "
-							+ socialSecurityNumber + " edited");
-					au.println("Record " + socialSecurityNumber
-							+ " edited");
-				} catch (AuthorizationException
-						| NullPointerException e) {
+					db.editRecord(user, record, socialSecurityNumber);
+					out.println("Record " + socialSecurityNumber + " edited");
+					au.println("Record " + socialSecurityNumber + " edited");
+				} catch (AuthorizationException | NullPointerException e) {
 					out.println(e.getMessage());
 					au.errorprintln(user, e.getMessage());
 				}
 			}
 		}
 	}
-	
+
 	private Record get(User user, String[] infos) throws WrongFormatException, AuthorizationException {
 		String socialSecurityNumber = infos[1];
 		if (socialSecurityNumber.length() == 12) {
@@ -474,28 +466,23 @@ public class server implements Runnable {
 			SSLServerSocketFactory ssf = null;
 			try { // set up key manager to perform server authentication
 				SSLContext ctx = SSLContext.getInstance("TLS");
-				KeyManagerFactory kmf = KeyManagerFactory
-						.getInstance("SunX509");
-				TrustManagerFactory tmf = TrustManagerFactory
-						.getInstance("SunX509");
+				KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+				TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
 				KeyStore ks = KeyStore.getInstance("JKS");
 				KeyStore ts = KeyStore.getInstance("JKS");
 				char[] password = "password".toCharArray();
 
 				/** Set and trim path to folders */
-				URL tempLocation = server.class.getProtectionDomain()
-						.getCodeSource().getLocation();
+				URL tempLocation = server.class.getProtectionDomain().getCodeSource().getLocation();
 				String location = "" + tempLocation;
 				location = location.substring(5, location.length() - 5);
 
-				ks.load(new FileInputStream(location
-						+ "/certificates/Server/serverkeystore"), password); // keystore
-																				// password
-																				// (storepass)
-				ts.load(new FileInputStream(location
-						+ "/certificates/Server/servertruststore"), password); // truststore
-																				// password
-																				// (storepass)
+				ks.load(new FileInputStream(location + "/certificates/Server/serverkeystore"), password); // keystore
+																											// password
+																											// (storepass)
+				ts.load(new FileInputStream(location + "/certificates/Server/servertruststore"), password); // truststore
+																											// password
+																											// (storepass)
 				kmf.init(ks, password); // certificate password (keypass)
 				tmf.init(ts); // possible to use keystore as truststore here
 				ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
@@ -511,10 +498,21 @@ public class server implements Runnable {
 	}
 
 	public class WrongFormatException extends Exception {
-		  public WrongFormatException() { super(); }
-		  public WrongFormatException(String message) { super(message); }
-		  public WrongFormatException(String message, Throwable cause) { super(message, cause); }
-		  public WrongFormatException(Throwable cause) { super(cause); }
+		public WrongFormatException() {
+			super();
 		}
+
+		public WrongFormatException(String message) {
+			super(message);
+		}
+
+		public WrongFormatException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public WrongFormatException(Throwable cause) {
+			super(cause);
+		}
+	}
 
 }

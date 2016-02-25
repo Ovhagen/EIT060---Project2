@@ -283,26 +283,24 @@ public class Database {
 	
 	public RecordEntry getRecordEntry(String socialSecurityNumber, User user) throws NullPointerException, AuthorizationException {
 		try {
-			RecordEntry re = null;
+			RecordEntry re = records.get(socialSecurityNumber);
 			if (user instanceof Government) {
-				re = records.get(socialSecurityNumber);
+				return re;
 			} else if (user instanceof Employee) {
 				Employee employee = (Employee) user;
-				re = records.get(socialSecurityNumber);
-				if (employee.getDivisionID() != re.getDivisionID()) {
+				if (employee.getDivisionID() == re.getDivisionID()) {
+					return re;
+				} else{
 					throw new AuthorizationException("You do not have permission to see that record");
 				}
 			} else {
-				re = records.get(socialSecurityNumber);
-				if (!re.getSocialSecurityNumber().equals(user.getID())){
+				if (re.getSocialSecurityNumber().equals(user.getID())){
+					return re;
+				} else {
 					throw new AuthorizationException("You do not have permission to see that record");
 				}
 			}
-			if(re == null){
-				throw new NullPointerException();
-			}
-			return re;
-		} catch(NullPointerException e) {
+		} catch(NullPointerException | AuthorizationException e) {
 			throw e;
 		}
 	}
@@ -332,7 +330,7 @@ public class Database {
 		
 		RecordEntry recordEntry = new RecordEntry(record, divisionID, doctorID,
 				nurseIDs, socialSecurityNumber);
-		if(user instanceof Doctor || user instanceof Government){
+		if(user instanceof Doctor){
 			records.put(socialSecurityNumber, recordEntry);
 			try {
 				saveDataBase();
@@ -345,12 +343,64 @@ public class Database {
 		}
 	}
 	
-	public void editACL(String edit, User user, String socialSecurityNumber, int doctorID, ArrayList<Integer> nurseIDs) throws AuthorizationException{
+	public void editDoctorACL(User user, String socialSecurityNumber, int doctorID) throws AuthorizationException{
+		if(user instanceof Government){
+			try{
+				RecordEntry re = records.get(socialSecurityNumber);
+				Record record = re.getRecord();
+				RecordEntry newRe = new RecordEntry(record, re.getDivisionID(), doctorID, re.getNurseIDs(), socialSecurityNumber);
+				records.remove(socialSecurityNumber);
+				records.put(socialSecurityNumber, newRe);
+				try {
+					saveDataBase();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (NullPointerException e){
+				throw new NullPointerException("No record for that social security number exists");
+			}
+		} else{
+			throw new AuthorizationException("You do not have permission to edit doctor IDs");
+		}
+	}
+	
+	public void addNurseACL(User user, String socialSecurityNumber, ArrayList<Integer> nurseIDs) throws AuthorizationException{
+		RecordEntry re = records.get(socialSecurityNumber);
+		ArrayList<Integer> oldNurseIDs = re.getNurseIDs();
+		Record record = re.getRecord();
+		if(user instanceof Doctor){
+			Doctor doctor = (Doctor) user;
+			for(int nurseID : nurseIDs){
+				if(!oldNurseIDs.contains(nurseID))
+					oldNurseIDs.add(nurseID);
+			}
+			nurseIDs = oldNurseIDs;
+			
+			if(doctor.getDivisionID() == record.getDivisionID()){
+				records.remove(socialSecurityNumber);
+				RecordEntry newRe = new RecordEntry(record, record.getDivisionID(), re.getDoctorID(), nurseIDs, socialSecurityNumber);
+				records.put(socialSecurityNumber, newRe);
+				try {
+					saveDataBase();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else {
+				throw new AuthorizationException("You do not have permission to edit that ACL");
+			}
+		}
+	}
+	
+	public void removeNurseACL(User user, String socialSecurityNumber, ArrayList<Integer> nurseIDs) throws AuthorizationException{
 		RecordEntry re = records.get(socialSecurityNumber);
 		Record record = re.getRecord();
 		int oldDoctorID = re.getDoctorID();
 		ArrayList<Integer> oldNurseIDs = re.getNurseIDs();
-		if(edit.equals("rm")){
+		
+		if(user instanceof Doctor){
+			Doctor doctor = (Doctor) user;
 			Iterator<Integer> it = oldNurseIDs.iterator();
 			for(Integer nurseID : nurseIDs){
 				while(it.hasNext()){
@@ -360,54 +410,22 @@ public class Database {
 					}
 				}
 			}
-			for(Integer nurseID : oldNurseIDs){
-				if(nurseIDs.contains(nurseID)){
-					oldNurseIDs.remove(new Integer(nurseID));
-				}
-			}
 			nurseIDs = oldNurseIDs;
-		} else if(edit.equals("add")){
-			for(int nurseID : nurseIDs){
-				oldNurseIDs.add(nurseID);
-			}
-			nurseIDs = oldNurseIDs;
-		} else if (edit.length() == 0){
-			if(!(user instanceof Government)){
-				throw new AuthorizationException("You are not allowed to edit doctor IDs");
-			}
-		}
-		if(user instanceof Doctor){
-			if(((Doctor) user).getDivisionID() == record.getDivisionID()){
+			if(doctor.getDivisionID() == record.getDivisionID()){
 				records.remove(socialSecurityNumber);
 				RecordEntry newRe = new RecordEntry(record, record.getDivisionID(), oldDoctorID, nurseIDs, socialSecurityNumber);
 				records.put(socialSecurityNumber, newRe);
+				try {
+					saveDataBase();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}else {
 				throw new AuthorizationException("You do not have permission to edit that ACL");
 			}
-			try {
-				saveDataBase();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} else if(user instanceof Government){
-			records.remove(socialSecurityNumber);
-			if(doctorID < 1000){
-				doctorID = oldDoctorID;
-			}
-			if(nurseIDs == null){
-				nurseIDs = oldNurseIDs;
-			}
-			RecordEntry newRe = new RecordEntry(record, record.getDivisionID(), doctorID, nurseIDs, socialSecurityNumber);
-			records.put(socialSecurityNumber, newRe);
-			try {
-				saveDataBase();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		} else {
-			throw new AuthorizationException("You do not have permission to edit ACLs");
+			throw new AuthorizationException("You do not have permission to edit ACLs for nurses");
 		}
 	}
 	
@@ -479,7 +497,7 @@ public class Database {
 			re = records.get(socialSecurityNumber);
 			if(re == null){
 				throw new NullPointerException();
-			} else if(user instanceof Government || user instanceof Doctor){
+			} else if(user instanceof Government){
 				records.remove(socialSecurityNumber);
 				Patient p = new Patient(socialSecurityNumber, "");
 				users.remove(p);
@@ -531,48 +549,35 @@ public class Database {
 			}
 			Record editedRecord = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
 			RecordEntry editedRecordEntry = new RecordEntry(editedRecord, divisionID, doctorID, nurseIDs, socialSecurityNumber);
-			
-			boolean success = false;
-			if(user instanceof Patient){
-				throw new AuthorizationException("Patients are not allowed to edit records");
-			} else {
-				if (user instanceof Government) {
-					success = true;
+
+			if (user instanceof Doctor) {
+				if (new Integer(((Doctor) user).getDivisionID()) == oldRecordEntry.getDivisionID()) {
 					records.remove(socialSecurityNumber);
 					records.put(socialSecurityNumber, editedRecordEntry);
-				} else if (user instanceof Doctor) {
-					if (new Integer(((Doctor) user).getDivisionID()) == oldRecordEntry.getDivisionID()) {
-						success = true;
+				} else {
+					throw new AuthorizationException("The patient does not belong to your division, Dr " + user.getName());
+				}
+			} else if (user instanceof Nurse) {
+				int nurseID = new Integer(user.getID());
+				for (int someNurseID : oldRecordEntry.getNurseIDs()) {
+					if (nurseID == someNurseID) {
 						records.remove(socialSecurityNumber);
 						records.put(socialSecurityNumber, editedRecordEntry);
 					} else {
-						throw new AuthorizationException("The patient does not belong to your division, Dr " + user.getName());
-					}
-				} else if (user instanceof Nurse) {
-					int nurseID = new Integer(user.getID());
-					for (int someNurseID : oldRecordEntry.getNurseIDs()) {
-						if (nurseID == someNurseID) {
-							success = true;
-							records.remove(socialSecurityNumber);
-							records.put(socialSecurityNumber, editedRecordEntry);
-						} else {
-							throw new AuthorizationException("This is not your patient, Nurse " + user.getName());
-						}
+						throw new AuthorizationException("This is not your patient, Nurse " + user.getName());
 					}
 				}
-				if(success){
-					try {
-						saveDataBase();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
+			} else {
+				throw new AuthorizationException("You are not allowed to edit records");
 			}
-		} catch (NullPointerException e){
-			throw (NullPointerException) e;
-		} catch (AuthorizationException e){
-			throw (AuthorizationException) e;
+			try {
+				saveDataBase();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (NullPointerException | AuthorizationException e){
+			throw e;
 		}
 	}
 
