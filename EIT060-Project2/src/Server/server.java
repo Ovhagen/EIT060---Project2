@@ -318,17 +318,39 @@ public class server implements Runnable {
 			StringBuilder stars = new StringBuilder();
 			StringBuilder divider = new StringBuilder();
 			ArrayList<Record> records = db.getAllAvailabe(user);
-			for (int i = 0; i < 126; i++) {
+			for (int i = 0; i < 127; i++) {
 				stars.append("*");
 				divider.append("-");
 			}
 			out.print(stars + "\n");
-			out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-30s %24s %s", "*", "First Name", "Surname",
+			out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-54s %s %s", "*", "First Name", "Surname",
 					"Division", "Social Security Number", "Comment", "*", "\n"));
-			out.print("*" + divider.substring(2) + "*\n");
 			for (Record r : records) {
-				out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-30s %24s %s", "*", r.getFirstName(),
-						r.getSurName(), r.getDivisionID(), r.getID(), r.getComment().trim(), "*", "\n"));
+				out.print("*" + divider.substring(2) + "*\n");
+				String comment = r.getComment();
+				String tempComment = comment;
+				String[] dividedComment = new String[comment.length()/54+1];
+				int i = 0;
+				/** Adds a - at the end of words that are split*/
+				for(i = 0; i < (comment.length()/54); i++){
+					if((Character.isSpaceChar(tempComment.charAt(55)))){
+						dividedComment[i] = tempComment.substring(0,55);
+						tempComment = tempComment.substring(55,tempComment.length());
+					
+					} else {
+						dividedComment[i] = tempComment.substring(0,53);
+						tempComment = tempComment.substring(53,tempComment.length());
+					}
+				}
+				if(tempComment.length() > 0)
+					dividedComment[i] = tempComment;
+				
+				out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-54s %s %s", "*", r.getFirstName(),
+						r.getSurName(), r.getDivisionID(), r.getID(), dividedComment[0].trim(), "*", "\n"));
+				for(i = 1; i < dividedComment.length; i++){
+					out.printf(String.format("%-1s %-15s %-15s %-10s %-25s %-54s %s %s", "*", "",
+							"", "", "", dividedComment[i].trim(), "*", "\n"));
+				}
 			}
 			out.println(stars);
 		} catch (AuthorizationException | NullPointerException e) {

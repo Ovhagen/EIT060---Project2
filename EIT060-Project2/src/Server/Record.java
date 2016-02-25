@@ -74,9 +74,9 @@ public class Record {
 		}
 		if(tempComment.length() > 0)
 		dividedComment[i] = tempComment;
-		s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "Comment: ", dividedComment[0], "*"));
+		s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "Comment: ", dividedComment[0].trim(), "*"));
 		for(i = 1; i < dividedComment.length; i++){
-			s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "", dividedComment[i], "*"));
+			s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "", dividedComment[i].trim(), "*"));
 		}
 		s.append("\n" + stars);
 		System.out.println(s);

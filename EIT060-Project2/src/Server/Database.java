@@ -192,12 +192,12 @@ public class Database {
 		
 	}
 	
-	synchronized public void saveDataBase() throws IOException {
+	synchronized private void saveDataBase() throws IOException {
 		File file = new File(location + "/Database/DataBase-infoFile.txt");
 		BufferedReader scan = null;
 		try {
 			scan = new BufferedReader(new InputStreamReader(
-					new FileInputStream(file),"UTF8"));
+					new FileInputStream(file)));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
