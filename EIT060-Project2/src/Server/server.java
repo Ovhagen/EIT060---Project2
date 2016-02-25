@@ -102,12 +102,16 @@ public class server implements Runnable {
 			String[] certifacateInfos = subject.split(",");
 			String clientID = certifacateInfos[1].substring(4, certifacateInfos[1].length());
 			String clientMsg = null;
-
-			while ((clientMsg = in.readLine()) != null) {
-				System.out.println(clientMsg);
-				handleInput(clientMsg, clientID);
-				out.println("listen");
-				out.flush();
+			
+			if(clientID.length() > 4){
+				handleInput("-g " + clientID, clientID);
+			} else {
+				while ((clientMsg = in.readLine()) != null) {
+					System.out.println(clientMsg);
+					handleInput(clientMsg, clientID);
+					out.println("listen");
+					out.flush();
+				}
 			}
 
 			connectedClients.remove(serial);
@@ -171,7 +175,7 @@ public class server implements Runnable {
 					break;
 				case "-g":
 					Record r = get(user, infos);
-					out.println(r.toString());
+					out.println(r.toFancyString());
 					break;
 				default:
 					throw new WrongFormatException("Command not recognized or no arguments");
@@ -292,24 +296,21 @@ public class server implements Runnable {
 
 	private void help(User user) {
 		out.println("Example Get: -g SocialSecurityNumber");
-		int userID = 4000;
-		if(user.getID().length() < 5){
-			userID = new Integer(user.getID());
-		}
-		if (userID < 3000) {
+		if(user instanceof Government){
 			out.println("Example Print All: -pa");
-			out.println("Example Edit: -e SocialSecurityNumber");
-		}
-		if (userID < 2000) {
 			out.println("Example Remove: -rm SocialSecurityNumber");
-			out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
-			out.println("Example: Add Nurses: -an SocialSecurityNumber NurseID1 NurseID2 NurseID3....");
-			out.println("Example: Remove Nurse: -rn SocialSecurityNumber NurseID1 NurseID2 NurseID3... ");
 			out.println("Example: Print ACL: -pacl SocialSecurityNumber");
-		}
-		if (userID < 1000) {
 			out.println("Example: Edit DoctorID: -ed SocialSecurityNumber DoctorID");
-		}
+		} else if (user instanceof Employee){
+			out.println("Example Edit: -e SocialSecurityNumber");	
+			out.println("Example Print All: -pa");
+			if(user instanceof Doctor){
+				out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
+				out.println("Example: Print ACL: -pacl SocialSecurityNumber");
+				out.println("Example: Add Nurses: -an SocialSecurityNumber NurseID1 NurseID2 NurseID3....");
+				out.println("Example: Remove Nurse: -rn SocialSecurityNumber NurseID1 NurseID2 NurseID3... ");
+			}
+		}		
 	}
 
 	private void printAll(User user) throws AuthorizationException {

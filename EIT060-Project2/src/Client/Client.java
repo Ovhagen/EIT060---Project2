@@ -19,7 +19,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import javax.security.cert.X509Certificate;
 
-
 import Server.server;
 
 /*
@@ -38,15 +37,15 @@ public class Client {
 	public static void main(String[] args) throws Exception {
 		new Client().init();
 	}
-	
-	public String getClientID(){
+
+	public String getClientID() {
 		return clientID;
 	}
-	
-	public String getSerial(){
+
+	public String getSerial() {
 		return serial;
 	}
-	
+
 	public void init() throws IOException{
 		String host = "localhost";
 		int port = 9876;
@@ -134,18 +133,11 @@ public class Client {
 				} 
 				System.out.println("Secure connection established\n\n");
 				
-				System.out.println("Succesful login! Type a command in the prompt and press enter.");
-				System.out.println("Help -h, Logout logout, Quit quit");
+
 				
-				for (;;) {
-					System.out.print(">");
-					msg = read.readLine();
-					if (msg.equalsIgnoreCase("quit") || msg.equalsIgnoreCase("logout")) {
-						break;
-					}
-					out.println(msg);
-					out.flush();
+				if(userPath.length() > 4){		//Patient
 					String fromServer;
+					msg = "logout";
 					while ((fromServer = in.readLine()) != null) {
 					    if (fromServer.equals("listen")){
 					        break;
@@ -153,11 +145,29 @@ public class Client {
 						    System.out.println(fromServer);
 					    }
 					}
-					
-					
+				} else {
+					System.out.println("Succesful login! Type a command in the prompt and press enter.");
+					System.out.println("Help -h, Logout logout, Quit quit");
+					for (;;) {		
+						System.out.print(">");
+						msg = read.readLine();
+						if (msg.equalsIgnoreCase("quit") || msg.equalsIgnoreCase("logout")) {
+							break;
+						}
+						out.println(msg);
+						out.flush();
+						String fromServer;
+						while ((fromServer = in.readLine()) != null) {
+						    if (fromServer.equals("listen")){
+						        break;
+						    } else {
+							    System.out.println(fromServer);
+						    }
+						}
+					}
 				}
 				if(msg.equals("logout")){
-					System.out.println("Logged out");
+					System.out.println("\n\nLogged out\n");
 					socket.close();
 					in.close();
 					out.close();
@@ -174,14 +184,24 @@ public class Client {
 				init();
 			}
 		}
+}
+
+public class LoginException extends Exception {
+	public LoginException() {
+		super();
 	}
-	public class LoginException extends Exception {
-		  public LoginException() { super(); }
-		  public LoginException(String message) { super(message); }
-		  public LoginException(String message, Throwable cause) { super(message, cause); }
-		  public LoginException(Throwable cause) { super(cause); }
-		}
-	
-	
+
+	public LoginException(String message) {
+		super(message);
+	}
+
+	public LoginException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public LoginException(Throwable cause) {
+		super(cause);
+	}
+}
 
 }
