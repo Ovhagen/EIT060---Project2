@@ -63,7 +63,6 @@ public class server implements Runnable {
 		} else {
 			clients.put(userID, (new Patient(userID, name)));
 		}
-
 	}
 
 	public void run() {
@@ -197,6 +196,7 @@ public class server implements Runnable {
 					}
 					try {
 						db.addNurseACL(user, socialSecurityNumber, nurseIDs);
+						out.println("Successfully added " + nurseIDs.toString());
 					} catch (AuthorizationException e) {
 						throw e;
 					}
@@ -219,6 +219,7 @@ public class server implements Runnable {
 				}
 				try {
 					db.removeNurseACL(user, socialSecurityNumber, nurseIDs);
+					out.println("Successfully removed " + nurseIDs.toString());
 				} catch (AuthorizationException e) {
 					throw e;
 				}
@@ -255,7 +256,7 @@ public class server implements Runnable {
 		if (socialSecurityNumber.length() == 12) {
 			try {
 				db.removeRecord(user, socialSecurityNumber);
-				System.out.println("Successfully removed " + socialSecurityNumber);
+				out.println("Successfully removed " + socialSecurityNumber);
 			} catch (NullPointerException | AuthorizationException e) {
 				throw e;
 			}
@@ -362,20 +363,16 @@ public class server implements Runnable {
 		if (infos.length > 4) {
 			String firstName = infos[1];
 			String surName = infos[2];
-			int divisionID = new Integer(infos[3]);
 			String socialSecurityNumber = infos[infos.length - 1];
 			ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
-			for (int i = 5; i < infos.length - 1; i++) {
+			for (int i = 3; i < infos.length - 1; i++) {
 				nurseIDs.add(new Integer(infos[i]));
 			}
 			String comment = takeInput(user, "Add comment to record: ");
-			int doctorID = 0;
 
-			Record record = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
 			try {
-				db.putRecord(user, record, divisionID, doctorID, nurseIDs, socialSecurityNumber);
+				db.putRecord(user, firstName, surName, comment, nurseIDs, socialSecurityNumber);
 				out.println("Record for " + socialSecurityNumber + " added");
-				au.println("Record for " + socialSecurityNumber + " added");
 			} catch (NumberFormatException | NullPointerException | AuthorizationException e) {
 				out.println(e.getMessage());
 				au.errorprintln(user, e.getMessage());
@@ -433,14 +430,14 @@ public class server implements Runnable {
 							} else {
 								out.println("Command " + choice + " not recognized");
 							}
+						} else {
+							throw new WrongFormatException("Wrong format. Try again");
 						}
 					}
 				}
-				record = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
 				try {
-					db.editRecord(user, record, socialSecurityNumber);
+					db.editRecord(user, firstName, surName, comment, divisionID, socialSecurityNumber);
 					out.println("Record " + socialSecurityNumber + " edited");
-					au.println("Record " + socialSecurityNumber + " edited");
 				} catch (AuthorizationException | NullPointerException e) {
 					out.println(e.getMessage());
 					au.errorprintln(user, e.getMessage());
