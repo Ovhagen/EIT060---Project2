@@ -3,6 +3,19 @@ README
 The database files are found in ~/EIT060-Project2/src/Database
 The auditlog files are found in ~/EIT060-Project2/src/AuditLogs
 
+Example database-data exists in ~/EIT060-Project2/src/Database/DatabaseBackup.txt
+
+**********************************************************************
+Before first startup
+----------------------------------------------------------------------
+The Database will look for a file to load. If none was found, it will
+create a new empty one. If you want to use the example-data from 
+DatabaseBackup.txt, make a copy of it and rename it Database99999999999999 
+or with todays date on the format yyyyMMddHHmmss.
+
+Example name: 	If it's the 3rd of March 2016 at 15:05:20, the name would be
+				Database20160303150520
+
 **********************************************************************
 To run server from console:
 ----------------------------------------------------------------------
@@ -33,23 +46,25 @@ Doctor users have code			1---
 Nurse users have code 			2---
 Patiens have their social security number
 
-|	UserID			|		Password		|
-----------------------------------------------
-|	0001			|		password		|
-|	1001			|		password		|
-|	1002			|		password		|
-|	2001			|		password		|
-|	2002			|		password		|
-|	2003			|		password		|
-|	2004			|		password		|
-|	2005			|		password		|
-|	2006			|		password		|
-|	192810111314	|		password		|
-|	195008042722	|		password		|
-|	196506111871	|		password		|
-|	198408171144	|		password		|
-|	198812143325	|		password		|
-|	199403034375	|		password		|
+|	UserID				|		Password		|
+-------------------------------------------------
+|	0001				|		password		|
+|	1001				|		password		|
+|	1002				|		password		|
+|	2001				|		password		|
+|	2002				|		password		|
+|	2003				|		password		|
+|	2004				|		password		|
+|	2005				|		password		|
+|	2006				|		password		|
+|	192810111314		|		password		|
+|	195008042722		|		password		|
+|	196506111871		|		password		|
+|	198408171144		|		password		|
+|	198812143325		|		password		|
+|-----------------------|-----------------------|
+
+>>>>>>> branch 'master' of https://github.com/Ovhagen/EIT060---Project2
 **********************************************************************
 To create a certificate
 ----------------------------------------------------------------------
@@ -63,9 +78,9 @@ Type the commands in the textfile ~/EIT060-Project2/certificates/commands.txt in
 	Change the paths in commands.txt to the CA-certificates if needed
 
 When entering the certificate attributes:
-CN: CommonName				- Firstname Surname
-OU: OrganizationalUnit		- UserID
+CN: 	CommonName			- Firstname Surname
+OU: 	OrganizationalUnit		- UserID
 O: 	Organization			- Division
-L: 	Locality				- <Leave blank>
+L: 	Locality			- <Leave blank>
 S: 	StateOrProvinceName		- <Leave blank>
-C:	CountryName				- <Leave blank>
+C:	CountryName			- <Leave blank>
