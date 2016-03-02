@@ -26,6 +26,31 @@ Example: Client.Client 9876
 Make sure the <port number> is the same as the server started!
 
 **********************************************************************
+Login in credentials
+----------------------------------------------------------------------
+Government users have code 		0---
+Doctor users have code			1---
+Nurse users have code 			2---
+Patiens have their social security number
+
+|	UserID			|		Password		|
+|-------------------------------|---------------------------------------|
+|	0001			|		password		|
+|	1001			|		password		|
+|	1002			|		password		|
+|	2001			|		password		|
+|	2002			|		password		|
+|	2003			|		password		|
+|	2004			|		password		|
+|	2005			|		password		|
+|	2006			|		password		|
+|	192810111314		|		password		|
+|	195008042722		|		password		|
+|	196506111871		|		password		|
+|	198408171144		|		password		|
+|	198812143325		|		password		|
+|	199403034375		|		password		|
+**********************************************************************
 To create a certificate
 ----------------------------------------------------------------------
 For Linux: Run script ~/EIT060-Project2/certificates/createUser.sh
@@ -38,9 +63,9 @@ Type the commands in the textfile ~/EIT060-Project2/certificates/commands.txt in
 	Change the paths in commands.txt to the CA-certificates if needed
 
 When entering the certificate attributes:
-CN	CommonName			- Firstname Surname
-OU: 	OrganizationalUnit		- UserID
-O:	Organization			- Division
-L: 	Locality			- <Leave blank>
+CN: CommonName				- Firstname Surname
+OU: OrganizationalUnit		- UserID
+O: 	Organization			- Division
+L: 	Locality				- <Leave blank>
 S: 	StateOrProvinceName		- <Leave blank>
-C:	CountryName			- <Leave blank>
+C:	CountryName				- <Leave blank>
