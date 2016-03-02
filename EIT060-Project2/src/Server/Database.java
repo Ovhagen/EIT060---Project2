@@ -595,7 +595,7 @@ public class Database {
 				users.add(p);
 			}
 			Record editedRecord = new Record(socialSecurityNumber, firstName, surName, divisionID, comment);
-			RecordEntry editedRecordEntry = new RecordEntry(editedRecord, divisionID, oldRecordEntry.getDivisionID(), oldRecordEntry.getNurseIDs(), socialSecurityNumber);
+			RecordEntry editedRecordEntry = new RecordEntry(editedRecord, divisionID, oldRecordEntry.getDoctorID(), oldRecordEntry.getNurseIDs(), socialSecurityNumber);
 
 			if (user instanceof Doctor) {
 				if (new Integer(((Doctor) user).getDivisionID()) == oldRecordEntry.getDivisionID()) {
