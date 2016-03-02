@@ -9,9 +9,9 @@ Example database-data exists in ~/EIT060-Project2/src/Database/DatabaseBackup.tx
 Before first startup
 ----------------------------------------------------------------------
 The Database will look for a file to load. If none was found, it will
-create a new one. If you want to use the example-data from DatabaseBackup.txt,
-make a copy of it and rename it Database00000000000000 or with todays 
-date on the format yyyyMMddHHmmss.
+create a new empty one. If you want to use the example-data from 
+DatabaseBackup.txt, make a copy of it and rename it Database00000000000000 
+or with todays date on the format yyyyMMddHHmmss.
 
 Example name: 	If it's the 3rd of March 2016 at 15:05:20, the name would be
 		Database20160303150520
