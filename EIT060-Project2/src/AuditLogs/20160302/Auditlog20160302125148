@@ -1,0 +1,94 @@
+
+02/03/2016 12:51:48 - Loading database DataBase20160302124950
+02/03/2016 12:51:48 - New client connected
+02/03/2016 12:51:48 - client name (cert subject DN field): CN=Kalle Ekdahl, OU=2001, O=1, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+02/03/2016 12:51:48 - Serial number: 12402813572523847030
+02/03/2016 12:51:48 - 1 concurrent connection(s)
+
+02/03/2016 12:51:48 - "-pa" from 2001
+02/03/2016 12:51:48 - "Printed all available records" from 2001
+02/03/2016 12:51:48 - client disconnected
+02/03/2016 12:51:48 - 0 concurrent connection(s)
+
+02/03/2016 12:51:48 - New client connected
+02/03/2016 12:51:48 - client name (cert subject DN field): CN=Hanna Adelstr”m, OU=2002, O=1, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+02/03/2016 12:51:48 - Serial number: 12402813572523847037
+02/03/2016 12:51:48 - 1 concurrent connection(s)
+
+02/03/2016 12:51:48 - "-pa" from 2002
+02/03/2016 12:51:48 - "Printed all available records" from 2002
+02/03/2016 12:51:48 - client disconnected
+02/03/2016 12:51:48 - 0 concurrent connection(s)
+
+02/03/2016 12:51:48 - New client connected
+02/03/2016 12:51:48 - client name (cert subject DN field): CN=Rolf Hansson, OU=1001, O=1, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+02/03/2016 12:51:48 - Serial number: 12402813572523847028
+02/03/2016 12:51:48 - 1 concurrent connection(s)
+
+02/03/2016 12:51:48 - "-pa" from 1001
+02/03/2016 12:51:48 - "Printed all available records" from 1001
+02/03/2016 12:51:48 - "-e 199403034375" from 1001
+02/03/2016 12:51:48 - "Returned record 199403034375" from 1001
+02/03/2016 12:51:48 - "-di 2" from 1001
+02/03/2016 12:51:48 - "Edited record 199403034375" from 1001
+02/03/2016 12:51:48 - Saved to database DataBase20160302125229.
+02/03/2016 12:51:48 - DataBase20160302123149 was deleted
+02/03/2016 12:51:48 - "-pa" from 1001
+02/03/2016 12:51:48 - "Printed all available records" from 1001
+02/03/2016 12:51:48 - client disconnected
+02/03/2016 12:51:48 - 0 concurrent connection(s)
+
+02/03/2016 12:51:48 - New client connected
+02/03/2016 12:51:48 - client name (cert subject DN field): CN=Stefan Lofven, OU=0001, O=0, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+02/03/2016 12:51:48 - Serial number: 12402813572523847036
+02/03/2016 12:51:48 - 1 concurrent connection(s)
+
+02/03/2016 12:51:48 - "-pa" from 0001
+02/03/2016 12:51:48 - "Printed all available records" from 0001
+02/03/2016 12:51:48 - "-e 199403034375" from 0001
+02/03/2016 12:51:48 - "Returned record 199403034375" from 0001
+02/03/2016 12:51:48 - "-di 1" from 0001
+02/03/2016 12:51:48 - Error cause by 0001. Error message: You are not allowed to edit records
+02/03/2016 12:51:48 - "-pa" from 0001
+02/03/2016 12:51:48 - "Printed all available records" from 0001
+02/03/2016 12:51:48 - New client connected
+02/03/2016 12:51:48 - client name (cert subject DN field): CN=Rolf Hansson, OU=1001, O=1, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+02/03/2016 12:51:48 - Serial number: 12402813572523847028
+02/03/2016 12:51:48 - 2 concurrent connection(s)
+
+02/03/2016 12:51:48 - "-h" from 1001
+02/03/2016 12:51:48 - "-pa" from 1001
+02/03/2016 12:51:48 - "Printed all available records" from 1001
+02/03/2016 12:51:48 - client disconnected
+02/03/2016 12:51:48 - 1 concurrent connection(s)
+
+02/03/2016 12:51:48 - New client connected
+02/03/2016 12:51:48 - client name (cert subject DN field): CN=Lena Hjort, OU=1002, O=2, L=Unknown, ST=Unknown, C=Unknown
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+02/03/2016 12:51:48 - Serial number: 12402813572523847051
+02/03/2016 12:51:48 - 2 concurrent connection(s)
+
+02/03/2016 12:51:48 - "-pa" from 1002
+02/03/2016 12:51:48 - "Printed all available records" from 1002
+02/03/2016 12:51:48 - "-p Lina Jansson 2004 2005 198301310313" from 1002
+02/03/2016 12:51:48 - "-pa" from 1002
+02/03/2016 12:51:48 - Saved to database DataBase20160302131152.
+02/03/2016 12:51:48 - DataBase20160302123221 was deleted
+02/03/2016 12:51:48 - Saved to database DataBase20160302131152.
+02/03/2016 12:51:48 - "-pa" from 1002
+02/03/2016 12:51:48 - "Printed all available records" from 1002
+02/03/2016 12:51:48 - "-e 198301310313" from 1002
+02/03/2016 12:51:48 - "Returned record 198301310313" from 1002
+02/03/2016 12:51:48 - "-co She's very hot" from 1002
+02/03/2016 12:51:48 - "Edited record 198301310313" from 1002
+02/03/2016 12:51:48 - Saved to database DataBase20160302131210.
+02/03/2016 12:51:48 - DataBase20160302124230 was deleted
+02/03/2016 12:51:48 - "-pa" from 1002
+02/03/2016 12:51:48 - "Printed all available records" from 1002
+02/03/2016 12:51:48 - client disconnected
+02/03/2016 12:51:48 - 1 concurrent connection(s)

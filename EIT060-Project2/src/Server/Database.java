@@ -28,12 +28,14 @@ import java.net.URL;
 
 
 
+
 import Client.Doctor;
 import Client.Employee;
 import Client.Government;
 import Client.Nurse;
 import Client.User;
 import Client.Patient;
+import Exeptions.AuthorizationException;
 
 public class Database {
 
@@ -67,6 +69,9 @@ public class Database {
 	}
 
 
+	/**
+	 * Loads info in the latest modified file into hashmaps.
+	 */
 	synchronized private void loadDataBase() throws IOException {
 		Scanner scan = null;
 		try {
@@ -147,12 +152,14 @@ public class Database {
 
 	}
 
+	/**
+	 * Removes the oldest file(s) if there are more than 5 saved files in the Database folder.
+	 */
 	synchronized private void removeOldestFile(){
 		File folder = new File(location + "/Database");
 		File[] listOfFiles = folder.listFiles();
 		long fileToRemove = Long.MAX_VALUE;
-		ArrayList<String[]> dates = new ArrayList<>();
-		if(listOfFiles.length > 7){
+		while(listOfFiles.length > 7){
 			for(File f : listOfFiles){
 				if(f.getName().length() == 22){
 					String d = f.getName().substring(8, f.getName().length());
@@ -167,9 +174,13 @@ public class Database {
 			if(deleted){
 				au.println("DataBase" + fileToRemove + " was deleted");
 			}
+			listOfFiles = folder.listFiles();
 		}
 	}
 	
+	/**
+	 * @return The latest modified database
+	 */
 	private File getLatestDatabase(){
 		File folder = new File(location + "/Database");
 		File[] listOfFiles = folder.listFiles();
@@ -192,6 +203,9 @@ public class Database {
 		
 	}
 	
+	/**
+	 * Writes the users and records to a new .txt-file
+	 */
 	synchronized private void saveDataBase() throws IOException {
 		File file = new File(location + "/Database/DataBase-infoFile.txt");
 		BufferedReader scan = null;
@@ -260,10 +274,13 @@ public class Database {
 			}
 		}
 		writer.close();
-		au.println("Database" + todaysDate + " was created.");
+		au.println("Saved to database DataBase" + todaysDate + ".");
 		removeOldestFile();
 	}
 
+	/**
+	 * Retrieves the specified record
+	 */
 	public Record getRecord(String socialSecurityNumber, User user) throws NullPointerException, AuthorizationException {
 		RecordEntry re = null;
 		try {
@@ -279,7 +296,10 @@ public class Database {
 		return re.getRecord();
 	}
 	
-	public RecordEntry getRecordEntry(String socialSecurityNumber, User user) throws NullPointerException, AuthorizationException {
+	/**
+	 * Retrieves the specified record entry
+	 */
+	private RecordEntry getRecordEntry(String socialSecurityNumber, User user) throws NullPointerException, AuthorizationException {
 		try {
 			RecordEntry re = records.get(socialSecurityNumber);
 			if (user instanceof Government) {
@@ -304,7 +324,10 @@ public class Database {
 		}
 	}
 
-	public void addUser(User user){
+	/**
+	 * Adds user to arraylist if didn't already exist
+	 */
+	private void addUser(User user){
 		users.add(user);
 		try {
 			saveDataBase();
@@ -314,15 +337,16 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Add a record and it's patient to the database if it doesn't already exists.
+	 */
 	public void putRecord(User user, String firstName, String surName, String comment,
-			ArrayList<Integer> nurseIDs, String socialSecurityNumber) throws NullPointerException, AuthorizationException{
+			ArrayList<Integer> nurseIDs, String socialSecurityNumber) throws AuthorizationException{
 		if(!users.contains(user)){
 			addUser(user);
 		}  
 		Patient patient = new Patient(socialSecurityNumber,firstName + " " + surName);
-		if(!users.contains(patient)){
-			addUser(patient);
-		} else {
+		if(users.contains(patient)){
 			throw new AuthorizationException("A patient with that socialSecurityNumber already exist.");
 		}
 		
@@ -334,6 +358,7 @@ public class Database {
 			RecordEntry recordEntry = new RecordEntry(record, d.getDivisionID(), doctorID,
 					nurseIDs, socialSecurityNumber);
 			records.put(socialSecurityNumber, recordEntry);
+			users.add(patient);
 			try {
 				saveDataBase();
 			} catch (IOException e) {
@@ -345,6 +370,9 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Edits the DoctorID for a record
+	 */
 	public void editDoctorACL(User user, String socialSecurityNumber, int doctorID) throws AuthorizationException{
 		if(user instanceof Government){
 			try{
@@ -367,6 +395,9 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Adds a nurse to specified record
+	 */
 	public void addNurseACL(User user, String socialSecurityNumber, ArrayList<Integer> nurseIDs) throws AuthorizationException{
 		RecordEntry re = records.get(socialSecurityNumber);
 		ArrayList<Integer> oldNurseIDs = re.getNurseIDs();
@@ -398,6 +429,9 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Remove a nurse form a specific record
+	 */
 	public void removeNurseACL(User user, String socialSecurityNumber, ArrayList<Integer> nurseIDs) throws AuthorizationException{
 		RecordEntry re = records.get(socialSecurityNumber);
 		Record record = re.getRecord();
@@ -436,6 +470,9 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Returns the access control list for the specified record
+	 */
 	public ArrayList<Integer> getACL(User user, String socialSecurityNumber) throws AuthorizationException{
 		ArrayList<Integer> acls = new ArrayList<Integer>();
 		RecordEntry re = records.get(socialSecurityNumber);
@@ -464,6 +501,9 @@ public class Database {
 		}
 	}
 	
+	/**
+	 * Returns all the record the specified user is allowed to read
+	 */
 	public ArrayList<Record> getAllAvailabe(User user) throws AuthorizationException{
 		ArrayList<Record> tempRecords = new ArrayList<>();
 		Iterator it = records.entrySet().iterator();
@@ -497,10 +537,13 @@ public class Database {
 		} else {
 			throw new AuthorizationException("You are not allowed to do that");
 		}
-		au.println(user, "Printed all availabele ACLs");
+		au.println(user, "Printed all available records");
 		return tempRecords;
 	}
 	
+	/**
+	 * Removes the specified record if it exists
+	 */
 	public void removeRecord(User user, String socialSecurityNumber) throws AuthorizationException, NullPointerException{
 		try {
 			RecordEntry re = records.get(socialSecurityNumber);
@@ -525,6 +568,10 @@ public class Database {
 		}
 	}
 
+	
+	/**
+	 * Edits some or many of the paramaters for the specified record, if it exists
+	 */
 	public void editRecord(User user, String firstName, String surName, String comment, int divisionID, String socialSecurityNumber) throws AuthorizationException, NullPointerException  {
 		try {
 			RecordEntry oldRecordEntry = getRecordEntry(socialSecurityNumber, user);
@@ -536,13 +583,13 @@ public class Database {
 			if(divisionID < 0){
 				divisionID = oldRecordEntry.getDivisionID();
 			}
+			if(firstName == null){
+				firstName = oldRecord.getFirstName();
+			}
+			if(surName == null){
+				surName = oldRecord.getSurName();
+			}
 			if(firstName != null || surName != null){
-				if(firstName == null){
-					firstName = oldRecord.getFirstName();
-				}
-				if(surName == null){
-					surName = oldRecord.getSurName();
-				}
 				Patient p = new Patient(socialSecurityNumber, firstName+surName);
 				users.remove(p);
 				users.add(p);
@@ -587,6 +634,9 @@ public class Database {
 		}
 	}
 
+	/**
+	 * The holder for a record containing it's ACL
+	 */
 	private class RecordEntry {
 		private Record record;
 		private int doctorID, divisionID;
@@ -623,12 +673,6 @@ public class Database {
 		}
 
 	}
-	
-	public class AuthorizationException extends Exception {
-		  public AuthorizationException() { super(); }
-		  public AuthorizationException(String message) { super(message); }
-		  public AuthorizationException(String message, Throwable cause) { super(message, cause); }
-		  public AuthorizationException(Throwable cause) { super(cause); }
-		}
+
 
 }

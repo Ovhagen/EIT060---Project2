@@ -1,19 +1,13 @@
+makedir Users/1003
 
-keytool -import -file certificate.cer -alias 7010103012_truststore -keystore 7010103012_truststore
+keytool -import -file CA/certificate.cer -alias Users/1003_truststore -keystore Users/1003_truststore
 
-keytool -keystore 7010103012_keystore -genkey -alias 7010103012_keystore
+keytool -keystore Users/1003_keystore -genkey -alias Users/1003_keystore
 
-keytool -keystore 7010103012_keystore -certreq -alias 7010103012_keystore -keyalg rsa -file 7010103012.csr
+keytool -keystore Users/1003_keystore -certreq -alias Users/1003_keystore -keyalg rsa -file Users/1003.csr
 
-openssl x509 -req -CA cacert.pem -CAkey /h/d5/g/dic14pov/git/EIT060---Project2/EIT060-Project2/certificates/CA/private/cakey.pem -in 7010103012.csr -out 7010103012.cer -days 365 -CAcreateserial
+openssl x509 -req -CA C:/Users/Christoffer/git/EIT060---Project2/EIT060-Project2/certificates/CA/cacert.pem -CAkey C:/Users/Christoffer/git/EIT060---Project2/EIT060-Project2/certificates/CA/private/cakey.pem -in Users/1003.csr -out Users/1003.cer -days 365 -CAcreateserial
 
-keytool -import -keystore 7010103012_keystore -file cacert.pem -alias cert
+keytool -import -keystore Users/1003_keystore -file C:/Users/Christoffer/git/EIT060---Project2/EIT060-Project2/certificates/CA/cacert.pem -alias cert
 
-keytool -import -keystore 7010103012_keystore -file 7010103012.cer -alias 7010103012_keystore
-
-
-cd
-javac Server/server.java Client/client.java
-
-java Server.server 9876
-java Client.client 
+keytool -import -keystore Users/1003_keystore -file Users/1003.cer -alias Users/1003_keystore

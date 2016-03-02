@@ -10,7 +10,6 @@ import javax.net.*;
 import javax.net.ssl.*;
 import javax.security.cert.X509Certificate;
 
-import Server.Database.AuthorizationException;
 import Client.Doctor;
 import Client.Employee;
 import Client.Government;
@@ -18,6 +17,8 @@ import Client.Nurse;
 import Client.Patient;
 import Client.User;
 import Client.Client;
+import Exeptions.AuthorizationException;
+import Exeptions.WrongFormatException;
 
 public class server implements Runnable {
 	private ServerSocket serverSocket = null;
@@ -43,29 +44,8 @@ public class server implements Runnable {
 		connectedClients = new ArrayList<>();
 	}
 
-	private void addUser(String subject) {
-		String[] certifacateInfos = subject.split(",");
-		String userID = certifacateInfos[1].substring(4, certifacateInfos[1].length());
-		String name = certifacateInfos[0].substring(3, certifacateInfos[0].length());
-		int division = new Integer(certifacateInfos[2].substring(3, certifacateInfos[2].length()));
 
-		if (userID.length() < 5) { // Not a Patient
-			int userType = new Integer(userID);
-			if (userType < 1000) {
-				clients.put(userID, (new Government(userID, name)));
-			} else {
-				if (userType < 2000) {
-					clients.put(userID, (new Doctor(userID, name, division)));
-				} else {
-					clients.put(userID, (new Nurse(userID, name, division)));
-				}
-			}
-		} else {
-			clients.put(userID, (new Patient(userID, name)));
-		}
-	}
-
-	public void run() {
+	public void run(){
 		try {
 			SSLSocket socket = (SSLSocket) serverSocket.accept();
 			newListener();
@@ -81,7 +61,7 @@ public class server implements Runnable {
 
 			if (connectedClients.contains(serial)) {
 				out.println("notAllowed");
-				throw new Exception("Client with serial " + serial + " already connected");
+				throw new AuthorizationException("Client with serial " + serial + " already connected");
 			} else {
 				out.println("allowed");
 			}
@@ -120,6 +100,9 @@ public class server implements Runnable {
 			numConnectedClients--;
 			au.println("client disconnected");
 			au.println(numConnectedClients + " concurrent connection(s)\n");
+		} catch (AuthorizationException e){
+			au.println("ERROR:" + e.getMessage());
+			out.println("User already logged in");
 		} catch (Exception e) {
 			Object o = e.getClass();
 			if (o instanceof Client) {
@@ -131,7 +114,14 @@ public class server implements Runnable {
 			}
 		}
 	}
-
+	
+	
+	/**
+	 * Handles the input from client and executes code accordingly
+	 * @param clientMsg - The input message sent from Client
+	 * @param clientID - The ID for the client
+	 * @throws IOException
+	 */
 	private void handleInput(String clientMsg, String clientID) throws IOException {
 		User user = clients.get(clientID);
 		au.println(user, clientMsg);
@@ -180,12 +170,49 @@ public class server implements Runnable {
 					throw new WrongFormatException("Command not recognized or no arguments");
 				}
 			}
-		} catch (Exception e) {
-			out.println("Error " + e.getMessage());
+		} catch (NullPointerException | AuthorizationException e) {
+			out.println("No record for that social security number or unauthorized action!");
+			au.println("Error " + e.getMessage());
+		} catch (WrongFormatException e){
+			out.println(e.getMessage());
 			au.println("Error " + e.getMessage());
 		}
 	} 
+	
+	/**
+	 * Creates and add user to an arraylist for authoriztion checks later
+	 * @param subject - Contains info of the user
+	 */
+	private void addUser(String subject) {
+		String[] certifacateInfos = subject.split(",");
+		String userID = certifacateInfos[1].substring(4, certifacateInfos[1].length());
+		String name = certifacateInfos[0].substring(3, certifacateInfos[0].length());
+		int division = new Integer(certifacateInfos[2].substring(3, certifacateInfos[2].length()));
 
+		if (userID.length() < 5) { // Not a Patient
+			int userType = new Integer(userID);
+			if (userType < 1000) {
+				clients.put(userID, (new Government(userID, name)));
+			} else {
+				if (userType < 2000) {
+					clients.put(userID, (new Doctor(userID, name, division)));
+				} else {
+					clients.put(userID, (new Nurse(userID, name, division)));
+				}
+			}
+		} else {
+			clients.put(userID, (new Patient(userID, name)));
+		}
+	}
+
+
+	/**
+	 * Adds a nurse to a specific record
+	 * @param user - User trying to perform operation
+	 * @param infos - Contains info for parameters
+	 * @throws WrongFormatException - Thrown if the social security number is not length 12
+	 * @throws AuthorizationException - Thrown if user is not doctor on the same division as record, or government
+	 */
 	private void addNurse(User user, String[] infos) throws WrongFormatException, AuthorizationException {
 		if (infos.length > 0) {			String socialSecurityNumber = infos[1];
 			if (socialSecurityNumber.length() == 12) {
@@ -209,6 +236,13 @@ public class server implements Runnable {
 		}
 	}
 
+	/**
+	 * Adds a nurse to a specific record
+	 * @param user - User trying to perform operation
+	 * @param infos - Contains info for parameters
+	 * @throws WrongFormatException - Thrown if the social security number is not length 12
+	 * @throws AuthorizationException - Thrown if user is not doctor on the same division as record, or government
+	 */
 	private void removeNurse(User user, String[] infos) throws WrongFormatException, AuthorizationException {
 		String socialSecurityNumber = infos[1];
 		if (socialSecurityNumber.length() == 12) {
@@ -231,6 +265,13 @@ public class server implements Runnable {
 		}
 	}
 
+	/**
+	 * Edits a record's doctorID
+	 * @param user - User trying to perform operation
+	 * @param infos - Contains info for parameters
+	 * @throws WrongFormatException - Thrown if the social security number is not length 12
+	 * @throws AuthorizationException - Thrown if user is not government
+	 */
 	private void editDoctorID(User user, String[] infos) throws WrongFormatException, AuthorizationException{
 
 		String socialSecurityNumber = infos[1];
@@ -250,6 +291,13 @@ public class server implements Runnable {
 		}
 	}
 
+	/**
+	 * Removes a record from the database
+	 * @param user - User trying to perform operation
+	 * @param infos - Contains info for parameters
+	 * @throws WrongFormatException - Thrown if the social security number is not length 12
+	 * @throws AuthorizationException - Thrown if user is not allowed to perform operation
+	 */
 	private void remove(User user, String[] infos) throws WrongFormatException, AuthorizationException {
 
 		String socialSecurityNumber = infos[1];
@@ -265,6 +313,13 @@ public class server implements Runnable {
 		}
 	}
 
+	/**
+	 * Prints an ACL for a specific record
+	 * @param user - User trying to perform operation
+	 * @param infos - Contains info for parameters
+	 * @throws WrongFormatException - Thrown if the social security number is not length 12
+	 * @throws AuthorizationException - Thrown if user is not doctor on the same division as record, or government
+	 */
 	private void printACL(User user, String[] infos) throws WrongFormatException, AuthorizationException {
 		String socialSecurityNumber = infos[1];
 		if (socialSecurityNumber.length() == 12) {
@@ -295,6 +350,10 @@ public class server implements Runnable {
 		}
 	}
 
+	/**
+	 * Prints all authorized operations for the logged in client
+	 * @param user - User asking for help
+	 */
 	private void help(User user) {
 		out.println("Example Get: -g SocialSecurityNumber");
 		if(user instanceof Government){
@@ -306,7 +365,7 @@ public class server implements Runnable {
 			out.println("Example Edit: -e SocialSecurityNumber");	
 			out.println("Example Print All: -pa");
 			if(user instanceof Doctor){
-				out.println("Example Put: -p Firstname Surname DivisionID NurseIDs SocialSecurityNumber");
+				out.println("Example Put: -p Firstname Surname NurseIDs SocialSecurityNumber");
 				out.println("Example: Print ACL: -pacl SocialSecurityNumber");
 				out.println("Example: Add Nurses: -an SocialSecurityNumber NurseID1 NurseID2 NurseID3....");
 				out.println("Example: Remove Nurse: -rn SocialSecurityNumber NurseID1 NurseID2 NurseID3... ");
@@ -314,6 +373,10 @@ public class server implements Runnable {
 		}		
 	}
 
+	/**
+	 * Prints all records the user is allowed to read
+	 * @param user - User trying to perform operation
+	 */
 	private void printAll(User user) throws AuthorizationException {
 		try {
 			StringBuilder stars = new StringBuilder();
@@ -359,7 +422,15 @@ public class server implements Runnable {
 		}
 	}
 
-	private void put(User user, String[] infos) throws IOException, WrongFormatException {
+	/**
+	 * Adds a record to the database with the divisionID of the user
+	 * @param user - User trying to perform operation
+	 * @param infos - Contains info for parameters to create the record
+	 * @throws WrongFormatException - Thrown if the social security number is not length 12
+	 * @throws AuthorizationException - Thrown if user is not a doctor
+	 * @throws IOException - Thrown if takeInput could not write to audit and/or client
+	 */
+	private void put(User user, String[] infos) throws AuthorizationException, IOException, WrongFormatException {
 		if (infos.length > 4) {
 			String firstName = infos[1];
 			String surName = infos[2];
@@ -382,8 +453,15 @@ public class server implements Runnable {
 		}
 	}
 
-	private String takeInput(User user, String s) throws IOException {
-		out.println(s);
+	/**
+	 * Asks question to client, waits for input and prints it to the auditlog
+	 * @param user - User trying to print 
+	 * @param question - Question to ask client
+	 * @return - Return 
+	 * @throws IOException
+	 */
+	private String takeInput(User user, String question) throws IOException {
+		out.println(question);
 		out.println("listen");
 		String input = in.readLine();
 		au.println(user, input);
@@ -391,6 +469,14 @@ public class server implements Runnable {
 		return input;
 	}
 
+	/**
+	 * Edit the parameters of a specific record 
+	 * @param user - User trying to perform operation
+	 * @param infos - Contains info for parameters
+	 * @throws WrongFormatException - Thrown if the social security number is not length 12
+	 * @throws AuthorizationException - Thrown if user is not allowed to perform operation
+	 * @throws IOException - Thrown if takeInput could not write to audit and/or client
+	 */
 	private void edit(User user, String[] infos) throws IOException, WrongFormatException, AuthorizationException {
 		Record record = get(user, infos);
 		String socialSecurityNumber = infos[1];
@@ -446,6 +532,13 @@ public class server implements Runnable {
 		}
 	}
 
+	/**
+	 * Retrieves a specific record from the database
+	 * @param user - User trying to perform operation
+	 * @param infos - Contains info for parameters
+	 * @throws WrongFormatException - Thrown if the social security number is not length 12
+	 * @throws AuthorizationException - Thrown if user is not allowed to perform operation
+	 */
 	private Record get(User user, String[] infos) throws WrongFormatException, AuthorizationException {
 		String socialSecurityNumber = infos[1];
 		if (socialSecurityNumber.length() == 12) {
@@ -519,24 +612,6 @@ public class server implements Runnable {
 			return ServerSocketFactory.getDefault();
 		}
 		return null;
-	}
-
-	public class WrongFormatException extends Exception {
-		public WrongFormatException() {
-			super();
-		}
-
-		public WrongFormatException(String message) {
-			super(message);
-		}
-
-		public WrongFormatException(String message, Throwable cause) {
-			super(message, cause);
-		}
-
-		public WrongFormatException(Throwable cause) {
-			super(cause);
-		}
 	}
 
 }

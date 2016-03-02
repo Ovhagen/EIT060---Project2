@@ -33,9 +33,11 @@ public class Client {
 
 	private String clientID;
 	private String serial;
+	private static int port;
 
 	public static void main(String[] args) throws Exception {
-		new Client().init();
+		port = new Integer(args[0]);
+		new Client().init(port);
 	}
 
 	public String getClientID() {
@@ -46,9 +48,8 @@ public class Client {
 		return serial;
 	}
 
-	public void init() throws IOException{
+	public void init(int port) throws IOException{
 		String host = "localhost";
-		int port = 9876;
 		String passwd = "";
 		String userPath = "";
 		boolean login = true;
@@ -171,7 +172,7 @@ public class Client {
 					socket.close();
 					in.close();
 					out.close();
-					init();
+					init(port);
 				} else {
 					System.out.println("Exit client");
 					socket.close();
@@ -181,7 +182,7 @@ public class Client {
 				}
 			} catch (LoginException e) {
 				System.out.println(e.getMessage());
-				init();
+				init(port);
 			}
 		}
 }

@@ -1,0 +1,18 @@
+/** Users */
+/** G = Government, D = Doctor, N = Nurse, P = Patient */
+/** Government IDs begin with 0---; Doctor IDs begin with 1---, Nurse IDs begin with 2--- */
+/** UserType;UserID;Full Name;Division
+
+/** Database */
+/** PersonalSeuciriyNumber;First Name; Surname; Division;Comment;DoctorID...;NurseID...
+-Users
+D;1001;Rolf Hansson;1
+P;199403034375;Christoffer MacFie
+P;199401012222;Hanna Karlsson
+P;199011211212;Bob Bobson
+P;199101121431;Bob Bobson
+-Records
+199403034375;Christoffer;MacFie;1;He's very ill;-1;2001;2002;2003
+199401012222;Hanna;Karlsson;1;She's very cool;-1;2002;2003
+199011211212;Bob;Bobson;1;Bob is cool;-1;2002
+199101121431;Bob;Bobson;1;He's a Bob;1;2002

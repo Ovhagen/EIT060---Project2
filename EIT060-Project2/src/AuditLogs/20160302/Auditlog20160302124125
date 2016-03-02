@@ -1,0 +1,27 @@
+
+02/03/2016 12:41:25 - Loading database DataBase20160302123221
+02/03/2016 12:41:25 - New client connected
+02/03/2016 12:41:25 - client name (cert subject DN field): CN=Rolf Hansson, OU=1001, O=1, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+02/03/2016 12:41:25 - Serial number: 12402813572523847028
+02/03/2016 12:41:25 - 1 concurrent connection(s)
+
+02/03/2016 12:41:25 - "-pa" from 1001
+02/03/2016 12:41:25 - "Printed all availabele ACLs" from 1001
+02/03/2016 12:41:25 - client disconnected
+02/03/2016 12:41:25 - 0 concurrent connection(s)
+
+02/03/2016 12:41:25 - New client connected
+02/03/2016 12:41:25 - client name (cert subject DN field): CN=Rolf Hansson, OU=1001, O=1, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+02/03/2016 12:41:25 - Serial number: 12402813572523847028
+02/03/2016 12:41:25 - 1 concurrent connection(s)
+
+02/03/2016 12:41:25 - "-pa" from 1001
+02/03/2016 12:41:25 - "Printed all availabele ACLs" from 1001
+02/03/2016 12:41:25 - "-p Bob Bobson 2002 199011211212" from 1001
+02/03/2016 12:41:25 - "Bob is cool" from 1001
+02/03/2016 12:41:25 - Database20160302124404 was created.
+02/03/2016 12:41:25 - Database20160302124404 was created.
+02/03/2016 12:41:25 - "-pa" from 1001
+02/03/2016 12:41:25 - "Printed all availabele ACLs" from 1001

@@ -1,0 +1,46 @@
+README
+
+The database files are found in ~/EIT060-Project2/src/Database
+The auditlog files are found in ~/EIT060-Project2/src/AuditLogs
+
+**********************************************************************
+To run server from console:
+----------------------------------------------------------------------
+Start cmd.exe
+Change directory into ~/EIT060-Project2/src
+Command: Server.server <port number>
+
+Example: Server.server 9876
+
+**********************************************************************
+To run client from console
+----------------------------------------------------------------------
+Make sure server is started before trying to connect with client!
+
+Start cmd.exe
+Change directory into ~/EIT060-Project2/src
+Command: Client.Client <port number>
+
+Example: Client.Client 9876
+
+Make sure the <port number> is the same as the server started!
+
+**********************************************************************
+To create a certificate
+----------------------------------------------------------------------
+For Linux: Run script ~/EIT060-Project2/certificates/createUser.sh
+
+For Windows: 
+Start cmd.exe
+Change directory to ~/EIT060-Project2/certificates/
+Type the commands in the textfile ~/EIT060-Project2/certificates/commands.txt into the command prompt, line by line
+	Change the <USERID> in commands.txt to the userID for the new login, for example 1002 or 199401024411
+	Change the paths in commands.txt to the CA-certificates if needed
+
+When entering the certificate attributes:
+CN: CommonName				- Firstname Surname
+OU: OrganizationalUnit		- UserID
+O: 	Organization			- Division
+L: 	Locality				- <Leave blank>
+S: 	StateOrProvinceName		- <Leave blank>
+C:	CountryName				- <Leave blank>

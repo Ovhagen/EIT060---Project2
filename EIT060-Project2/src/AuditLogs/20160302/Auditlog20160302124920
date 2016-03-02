@@ -1,0 +1,16 @@
+
+02/03/2016 12:49:20 - Loading database DataBase20160302124404
+02/03/2016 12:49:20 - New client connected
+02/03/2016 12:49:20 - client name (cert subject DN field): CN=Rolf Hansson, OU=1001, O=1, L=Lund, ST=Sverige, C=SE
+issuer name(cert issuer DN field): CN=CA, O=LTH, L=LUND, ST=Skane, C=SE
+02/03/2016 12:49:20 - Serial number: 12402813572523847028
+02/03/2016 12:49:20 - 1 concurrent connection(s)
+
+02/03/2016 12:49:20 - "-pa" from 1001
+02/03/2016 12:49:20 - "Printed all availabele ACLs" from 1001
+02/03/2016 12:49:20 - "-p Bob Bobson 2002 199101121431" from 1001
+02/03/2016 12:49:20 - "He's a Bob" from 1001
+02/03/2016 12:49:20 - Saved to 20160302124950.
+02/03/2016 12:49:20 - DataBase20160302122613 was deleted
+02/03/2016 12:49:20 - "-pa" from 1001
+02/03/2016 12:49:20 - "Printed all availabele ACLs" from 1001
