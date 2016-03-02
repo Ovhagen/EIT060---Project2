@@ -47,7 +47,8 @@ Nurse users have code 			2---
 Patiens have their social security number
 
 |	UserID				|		Password		|
--------------------------------------------------
+|
+---------------------------------------|---------------------------------------|
 |	0001				|		password		|
 |	1001				|		password		|
 |	1002				|		password		|
@@ -57,14 +58,14 @@ Patiens have their social security number
 |	2004				|		password		|
 |	2005				|		password		|
 |	2006				|		password		|
-|	192810111314		|		password		|
-|	195008042722		|		password		|
-|	196506111871		|		password		|
-|	198408171144		|		password		|
-|	198812143325		|		password		|
-|-----------------------|-----------------------|
+|	192810111314			|		password		|
+|	195008042722			|		password		|
+|	196506111871			|		password		|
+|	198408171144			|		password		|
+|	198812143325			|		password		|
+|---------------------------------------|---------------------------------------|
 
->>>>>>> branch 'master' of https://github.com/Ovhagen/EIT060---Project2
+
 **********************************************************************
 To create a certificate
 ----------------------------------------------------------------------
