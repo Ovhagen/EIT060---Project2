@@ -47,8 +47,7 @@ Nurse users have code 			2---
 Patiens have their social security number
 
 |	UserID				|		Password		|
-|
----------------------------------------|---------------------------------------|
+|---------------------------------------|---------------------------------------|
 |	0001				|		password		|
 |	1001				|		password		|
 |	1002				|		password		|
