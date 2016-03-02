@@ -64,9 +64,9 @@ Type the commands in the textfile ~/EIT060-Project2/certificates/commands.txt in
 	Change the paths in commands.txt to the CA-certificates if needed
 
 When entering the certificate attributes:
-CN: CommonName				- Firstname Surname
-OU: OrganizationalUnit		- UserID
+CN: 	CommonName			- Firstname Surname
+OU: 	OrganizationalUnit		- UserID
 O: 	Organization			- Division
-L: 	Locality				- <Leave blank>
+L: 	Locality			- <Leave blank>
 S: 	StateOrProvinceName		- <Leave blank>
-C:	CountryName				- <Leave blank>
+C:	CountryName			- <Leave blank>
