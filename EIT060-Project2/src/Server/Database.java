@@ -147,7 +147,9 @@ public class Database {
 				}
 			}
 		} else {
-			throw new IOException("Could not load database properly");
+			file = new File(location + "DataBase/DataBase-infoFile.txt");
+			saveDataBase();
+			throw new IOException("Could not load database properly. Loaded empty database.");
 		}
 
 	}
