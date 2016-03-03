@@ -2,6 +2,7 @@ package Server;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,8 +57,8 @@ public class server implements Runnable {
 			String issuer = cert.getIssuerDN().getName();
 			String serial = cert.getSerialNumber().toString();
 
-			out = new PrintWriter(socket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "ISO-8859-15"));
+			out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF8"));
 
 			if (connectedClients.contains(serial)) {
 				out.println("notAllowed");
