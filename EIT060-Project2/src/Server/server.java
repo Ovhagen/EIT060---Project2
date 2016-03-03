@@ -137,7 +137,7 @@ public class server implements Runnable {
 				case "-pa":
 					printAll(user);
 					break;
-				default:
+				default: 
 					throw new WrongFormatException("Command not recognized or no arguments");
 				}
 			} else if (infos.length > 1) {
@@ -491,7 +491,7 @@ public class server implements Runnable {
 			String edit = takeInput(user,
 					"What do you want to change? \n FirstName -fn, Surname -sn, Comment -co, Divison -di \nSocialSecurityNumber -scc, Quit -q");
 
-			if (!edit.contains("-q")) {
+			while(!edit.contains("-q")) {
 				String[] edits = edit.split(" ");
 				for (int i = 0; i < edits.length; i += 2) {
 					if (edits[i].contains("-co")) {
@@ -529,8 +529,11 @@ public class server implements Runnable {
 					out.println(e.getMessage());
 					au.errorprintln(user, e.getMessage());
 				}
+				out.println("-q to leave editor.");
+				edit = takeInput(user, "Next edit: ");
 			}
 		}
+		out.println("-------");
 	}
 
 	/**
