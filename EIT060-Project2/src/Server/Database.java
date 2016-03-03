@@ -36,6 +36,7 @@ import Client.Nurse;
 import Client.User;
 import Client.Patient;
 import Exeptions.AuthorizationException;
+import Exeptions.WrongFormatException;
 
 public class Database {
 
@@ -64,7 +65,13 @@ public class Database {
 			throw new IOException("There are no databases in the system. Created empty database");
 		} else {
 			au.println("Loading database " + file.getName());
-			loadDataBase();
+			try {
+				loadDataBase();
+			} catch (IOException e){
+				file = new File(location + "DataBase/DataBase-infoFile.txt");
+				saveDataBase();
+				throw new IOException(e.getMessage() + " Loaded new empty database.");
+			}
 		}
 	}
 
@@ -147,9 +154,7 @@ public class Database {
 				}
 			}
 		} else {
-			file = new File(location + "DataBase/DataBase-infoFile.txt");
-			saveDataBase();
-			throw new IOException("Could not load database properly. Loaded empty database.");
+			throw new IOException("Could not load database properly");
 		}
 
 	}
@@ -343,13 +348,19 @@ public class Database {
 	 * Add a record and it's patient to the database if it doesn't already exists.
 	 */
 	public void putRecord(User user, String firstName, String surName, String comment,
-			ArrayList<Integer> nurseIDs, String socialSecurityNumber) throws AuthorizationException{
+			ArrayList<Integer> nurseIDs, String socialSecurityNumber) throws AuthorizationException, WrongFormatException {
 		if(!users.contains(user)){
 			addUser(user);
 		}  
 		Patient patient = new Patient(socialSecurityNumber,firstName + " " + surName);
 		if(users.contains(patient)){
 			throw new AuthorizationException("A patient with that socialSecurityNumber already exist.");
+		}
+		
+		for(int nurseID : nurseIDs){
+			if(nurseID < 2000 || nurseID > 2999){
+				throw new WrongFormatException("NurseIDs incorrect. A nurseID must be an id between 2000-2999");
+			}
 		}
 		
 		
@@ -375,8 +386,11 @@ public class Database {
 	/**
 	 * Edits the DoctorID for a record
 	 */
-	public void editDoctorACL(User user, String socialSecurityNumber, int doctorID) throws AuthorizationException{
+	public void editDoctorACL(User user, String socialSecurityNumber, int doctorID) throws AuthorizationException, WrongFormatException{
 		if(user instanceof Government){
+			if(doctorID > 1999 || doctorID < 1000){
+				throw new WrongFormatException("DoctorIDs must be between 1000-1999");
+			}
 			try{
 				RecordEntry re = records.get(socialSecurityNumber);
 				Record record = re.getRecord();
@@ -400,11 +414,19 @@ public class Database {
 	/**
 	 * Adds a nurse to specified record
 	 */
-	public void addNurseACL(User user, String socialSecurityNumber, ArrayList<Integer> nurseIDs) throws AuthorizationException{
+	public void addNurseACL(User user, String socialSecurityNumber, ArrayList<Integer> nurseIDs) throws AuthorizationException, WrongFormatException{
 		RecordEntry re = records.get(socialSecurityNumber);
 		ArrayList<Integer> oldNurseIDs = re.getNurseIDs();
 		Record record = re.getRecord();
 		StringBuilder nurses = new StringBuilder();
+		
+		
+		for(int nurseID : nurseIDs){
+			if(nurseID < 2000 || nurseID > 2999){
+				throw new WrongFormatException("NurseIDs incorrect. A nurseID must be an id between 2000-2999");
+			}
+		}
+		
 		if(user instanceof Doctor){
 			Doctor doctor = (Doctor) user;
 			for(int nurseID : nurseIDs){
@@ -434,12 +456,19 @@ public class Database {
 	/**
 	 * Remove a nurse form a specific record
 	 */
-	public void removeNurseACL(User user, String socialSecurityNumber, ArrayList<Integer> nurseIDs) throws AuthorizationException{
+	public void removeNurseACL(User user, String socialSecurityNumber, ArrayList<Integer> nurseIDs) throws AuthorizationException, WrongFormatException{
 		RecordEntry re = records.get(socialSecurityNumber);
 		Record record = re.getRecord();
 		int oldDoctorID = re.getDoctorID();
 		ArrayList<Integer> oldNurseIDs = re.getNurseIDs();
 		StringBuilder nurses = new StringBuilder();
+		
+		for(int nurseID : nurseIDs){
+			if(nurseID < 2000 || nurseID > 2999){
+				throw new WrongFormatException("NurseIDs incorrect. A nurseID must be an id between 2000-2999");
+			}
+		}
+		
 		if(user instanceof Doctor){
 			Doctor doctor = (Doctor) user;
 			Iterator<Integer> it = oldNurseIDs.iterator();
