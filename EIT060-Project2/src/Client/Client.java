@@ -6,8 +6,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Scanner;
 
@@ -125,8 +127,8 @@ public class Client {
 				X509Certificate cert = (X509Certificate) session.getPeerCertificateChain()[0];
 				serial = cert.getSerialNumber().toString();
 				BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
-				PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF8"));
 				String msg;
 				String allowed = in.readLine();
 				if(allowed.equalsIgnoreCase("notAllowed")){
