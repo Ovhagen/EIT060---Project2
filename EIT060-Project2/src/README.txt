@@ -64,6 +64,61 @@ Patiens have their social security number
 |	198812143325			|		password		|
 |---------------------------------------|---------------------------------------|
 
+**********************************************************************
+Command Guide
+----------------------------------------------------------------------
+Write -h in the console for help with syntax for available commands
+as the current user.
+
+System Commands:
+----------------------------------------------------------------------
+Get: -g SocialSecurityNumber
+
+Retrieves the record for the person with entered Social Security Number.
+----------------------------------------------------------------------
+Edit: -e SocialSecurityNumber
+
+Gives different option for editing a existing record associated to the entered 
+Social Security Number.
+----------------------------------------------------------------------
+Print All: -pa
+
+Prints all available records for the current users.
+----------------------------------------------------------------------
+Put: -p Firstname Surname NurseIDs SocialSecurityNumber (Doctors only)
+
+Creates a new record for the entered Social Security Number. Every
+argument in this command is seperated by a space.
+
+An example would be: -p Sven Eriksson 2002 2005 2004 199502931239
+----------------------------------------------------------------------
+Print ACL: -pacl SocialSecurityNumber
+
+Prints the ACL for the record tied to the entered Social Security Number.
+----------------------------------------------------------------------
+Add Nurses: -an SocialSecurityNumber NurseID1 NurseID2 NurseID3.... (Doctors only)
+
+Adds the nurses to an existing record for the entered Social Security Number. Every
+argument in this command is separated by a space.
+
+An example would be: -an 199502931239 2002 2005 2004
+----------------------------------------------------------------------
+Remove Nurse: -rn SocialSecurityNumber NurseID1 NurseID2 NurseID3... (Doctors only)
+
+Removes the nurses to an existing record for the entered Social Security Number. Every
+argument in this command is separated by a space.
+
+An example would be: -rn 199502931239 2002 2005 2004
+----------------------------------------------------------------------
+Edit DoctorID: -ed SocialSecurityNumber DoctorID (Government only)
+
+Edits the current DoctorID associated with the existing record for
+the entered Social Security Number.
+----------------------------------------------------------------------
+-rm SocialSecurityNumber (Government only)
+
+Removes the existing record for the entered Social Security Number.
+----------------------------------------------------------------------
 
 **********************************************************************
 To create a certificate
