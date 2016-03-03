@@ -1,5 +1,7 @@
 package Server;
 
+import java.util.ArrayList;
+
 public class Record {
 	
 
@@ -57,29 +59,29 @@ public class Record {
 		s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "Surname:", surName, "*"));
 		s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "Division:", (""+divisionID), "*"));
 		String tempComment = comment;
-		String[] dividedComment = new String[comment.length()/21+1];
+		ArrayList<String> dividedComment = new ArrayList<>();
 		int i = 0;
-		for(i = 0; i < (comment.length()/22); i++){
-			if(!(tempComment.charAt(22) == ' ')){
-				dividedComment[i] = tempComment.substring(0,21);
+		while(tempComment.length() > 22){
+			if((tempComment.charAt(22) == ' ' || tempComment.charAt(20) == ' ')){
+				dividedComment.add(tempComment.substring(0,21));
 				tempComment = tempComment.substring(21,tempComment.length());
 			} else if (tempComment.charAt(21) == ' ') {
-				dividedComment[i] = tempComment.substring(0,20);
-				tempComment = tempComment.substring(20,tempComment.length());
+				dividedComment.add(tempComment.substring(0,22));
+				tempComment = tempComment.substring(22,tempComment.length());
 			} else {
-				dividedComment[i] = tempComment.substring(0,21) + "-";
+				dividedComment.add(tempComment.substring(0,21) + "-");
 				tempComment = tempComment.substring(21,tempComment.length());
 			}
 			
 		}
-		if(tempComment.length() > 0)
-		dividedComment[i] = tempComment;
-		s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "Comment: ", dividedComment[0].trim(), "*"));
-		for(i = 1; i < dividedComment.length; i++){
-			s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "", dividedComment[i].trim(), "*"));
+		if(tempComment.length() > 0){
+			dividedComment.add(tempComment);
+		}
+			s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "Comment: ", dividedComment.get(0).trim(), "*"));
+		for(i = 1; i < dividedComment.size(); i++){
+			s.append(String.format("%s %s %-12s %-22s %s", "\n", "*", "", dividedComment.get(i).trim(), "*"));
 		}
 		s.append("\n" + stars);
-		System.out.println(s);
 		return s.toString();
 		
 		
