@@ -232,7 +232,7 @@ public class server implements Runnable {
 					throw new WrongFormatException("No argument found");
 				}
 			} else {
-				throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
+				throw new WrongFormatException("Wrong format of social security number, should be yyyyMMddxxxx. Try again");
 			}
 		}
 	}
@@ -262,7 +262,7 @@ public class server implements Runnable {
 				throw new WrongFormatException("No argument found");
 			}
 		} else {
-			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
+			throw new WrongFormatException("Wrong format of social security number, should be yyyyMMddxxxx. Try again");
 		}
 	}
 
@@ -310,7 +310,7 @@ public class server implements Runnable {
 				throw e;
 			}
 		} else {
-			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
+			throw new WrongFormatException("Wrong format of social security number, should be yyyyMMddxxxx. Try again");
 		}
 	}
 
@@ -347,7 +347,7 @@ public class server implements Runnable {
 				throw e;
 			}
 		} else {
-			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
+			throw new WrongFormatException("Wrong format of social security number, should be yyyyMMddxxxx. Try again");
 		}
 	}
 
@@ -436,18 +436,22 @@ public class server implements Runnable {
 			String firstName = infos[1];
 			String surName = infos[2];
 			String socialSecurityNumber = infos[infos.length - 1];
-			ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
-			for (int i = 3; i < infos.length - 1; i++) {
-				nurseIDs.add(new Integer(infos[i]));
-			}
-			String comment = takeInput(user, "Add comment to record: ");
-
-			try {
-				db.putRecord(user, firstName, surName, comment, nurseIDs, socialSecurityNumber);
-				out.println("Record for " + socialSecurityNumber + " added");
-			} catch (NumberFormatException | NullPointerException | AuthorizationException e) {
-				out.println(e.getMessage());
-				au.errorprintln(user, e.getMessage());
+			if (socialSecurityNumber.length() == 12) {
+				ArrayList<Integer> nurseIDs = new ArrayList<Integer>();
+				for (int i = 3; i < infos.length - 1; i++) {
+					nurseIDs.add(new Integer(infos[i]));
+				}
+				String comment = takeInput(user, "Add comment to record: ");
+	
+				try {
+					db.putRecord(user, firstName, surName, comment, nurseIDs, socialSecurityNumber);
+					out.println("Record for " + socialSecurityNumber + " added");
+				} catch (NumberFormatException | NullPointerException | AuthorizationException e) {
+					out.println(e.getMessage());
+					au.errorprintln(user, e.getMessage());
+				}
+			} else {
+				throw new WrongFormatException("Wrong format of social security number, should be yyyyMMddxxxx. Try again");
 			}
 		} else {
 			throw new WrongFormatException("Too few arguments");
@@ -554,7 +558,7 @@ public class server implements Runnable {
 				throw e;
 			}
 		} else {
-			throw new WrongFormatException("Wrong format, should be yyyyMMddxxxx. Try again");
+			throw new WrongFormatException("Wrong format of social security number, should be yyyyMMddxxxx. Try again");
 		}
 	}
 
